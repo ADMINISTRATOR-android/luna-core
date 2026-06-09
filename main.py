@@ -31,7 +31,7 @@ hf_client = InferenceClient(api_key=HF_TOKEN)
 
 class ChatMessage(BaseModel):
     role: str
-    content: Union[str, List[Any]]  # Handles both simple text and complex Big-AGI text structures
+    content: Union[str, List[Any]]
 
 class OpenAIChatRequest(BaseModel):
     model: str
@@ -65,7 +65,6 @@ async def openai_chat_endpoint(request: OpenAIChatRequest):
             if msg.role == "system":
                 continue
                 
-            # Extract plain text content if Big-AGI sends it as an object/list
             text_content = ""
             if isinstance(msg.content, list):
                 for item in msg.content:
@@ -78,7 +77,8 @@ async def openai_chat_endpoint(request: OpenAIChatRequest):
 
             api_messages.append({"role": msg.role, "content": text_content})
 
-        completion = hf_client.chat.completion(
+        # ✨ THE CORRECTION: changed .completion to .completions
+        completion = hf_client.chat.completions(
             model="Qwen/Qwen2.5-72B-Instruct",
             messages=api_messages,
             max_tokens=1024,
@@ -105,4 +105,3 @@ async def openai_chat_endpoint(request: OpenAIChatRequest):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-        
