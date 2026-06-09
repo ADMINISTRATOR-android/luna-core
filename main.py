@@ -16,10 +16,8 @@ LUNA_PERSONA = (
 
 SYSTEM_PROMPT = f"{LUNA_PERSONA}\n\nUSER IDENTITY: {ADMIN_IDENTITY}\nPROTOCOL: Execute with administrative precision."
 
-# This is the exact variable the server is looking for
 app = FastAPI(title="Luna Native Backend")
 
-# Enable global cross-origin pipelines for mobile app connections
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], 
@@ -28,43 +26,72 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-class ChatRequest(BaseModel):
-    message: str
-    history: Optional[List[Dict[str, str]]] = []
-
-class ChatResponse(BaseModel):
-    response: str
-    session_id: str
-
 HF_TOKEN = os.environ.get("HF_TOKEN", "")
 hf_client = InferenceClient(api_key=HF_TOKEN)
+
+class ChatMessage(BaseModel):
+    role: str
+    content: str
+
+class OpenAIChatRequest(BaseModel):
+    model: str
+    messages: List[ChatMessage]
+    stream: Optional[bool] = False
 
 @app.get("/")
 async def root_check():
     return {"status": "online", "identity": "Luna Core Matrix Gateway"}
 
-@app.post("/api/chat")
-async def chat_endpoint(request: ChatRequest):
+# 🔐 THIS IS WHAT BIG-AGI IS LOOKING FOR:
+@app.get("/v1/models")
+async def get_models():
+    return {
+        "object": "list",
+        "data": [
+            {
+                "id": "luna-core-v1",
+                "object": "model",
+                "created": 1717920000,
+                "owned_by": "administrator"
+            }
+        ]
+    }
+
+# 💬 THIS HANDLES THE CHAT COMPATIBILITY PIPELINE:
+@app.post("/v1/chat/completions")
+async def openai_chat_endpoint(request: OpenAIChatRequest):
     try:
-        session_id = str(uuid.uuid4())
-        messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+        api_messages = [{"role": "system", "content": SYSTEM_PROMPT}]
         
-        if request.history:
-            for msg in request.history:
-                messages.append({"role": msg["role"], "content": msg["content"]})
-        
-        messages.append({"role": "user", "content": request.message})
+        for msg in request.messages:
+            if msg.role != "system":
+                api_messages.append({"role": msg.role, "content": msg.content})
 
         completion = hf_client.chat.completion(
             model="Qwen/Qwen2.5-72B-Instruct",
-            messages=messages,
+            messages=api_messages,
             max_tokens=1024,
             temperature=0.7
         )
         
-        return ChatResponse(
-            response=completion.choices[0].message.content,
-            session_id=session_id
-        )
+        reply = completion.choices[0].message.content
+        
+        return {
+            "id": f"chatcmpl-{uuid.uuid4()}",
+            "object": "chat.completion",
+            "created": 1717920000,
+            "model": request.model,
+            "choices": [
+                {
+                    "index": 0,
+                    "message": {
+                        "role": "assistant",
+                        "content": reply
+                    },
+                    "finish_reason": "stop"
+                }
+            ]
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+        
