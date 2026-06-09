@@ -1,6 +1,6 @@
 import os
 import uuid
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Union
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
@@ -31,7 +31,7 @@ hf_client = InferenceClient(api_key=HF_TOKEN)
 
 class ChatMessage(BaseModel):
     role: str
-    content: str
+    content: Union[str, List[Any]]  # Handles both simple text and complex Big-AGI text structures
 
 class OpenAIChatRequest(BaseModel):
     model: str
@@ -42,7 +42,6 @@ class OpenAIChatRequest(BaseModel):
 async def root_check():
     return {"status": "online", "identity": "Luna Core Matrix Gateway"}
 
-# 🔐 THIS IS WHAT BIG-AGI IS LOOKING FOR:
 @app.get("/v1/models")
 async def get_models():
     return {
@@ -57,15 +56,27 @@ async def get_models():
         ]
     }
 
-# 💬 THIS HANDLES THE CHAT COMPATIBILITY PIPELINE:
 @app.post("/v1/chat/completions")
 async def openai_chat_endpoint(request: OpenAIChatRequest):
     try:
         api_messages = [{"role": "system", "content": SYSTEM_PROMPT}]
         
         for msg in request.messages:
-            if msg.role != "system":
-                api_messages.append({"role": msg.role, "content": msg.content})
+            if msg.role == "system":
+                continue
+                
+            # Extract plain text content if Big-AGI sends it as an object/list
+            text_content = ""
+            if isinstance(msg.content, list):
+                for item in msg.content:
+                    if isinstance(item, dict) and "text" in item:
+                        text_content += item["text"]
+                    elif isinstance(item, str):
+                        text_content += item
+            else:
+                text_content = str(msg.content)
+
+            api_messages.append({"role": msg.role, "content": text_content})
 
         completion = hf_client.chat.completion(
             model="Qwen/Qwen2.5-72B-Instruct",
