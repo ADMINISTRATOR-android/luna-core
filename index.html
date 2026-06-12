@@ -3,101 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LUNA UI | QUANTUM CORE</title>
+    <title>LUNA — JARVIS CORE V3.3</title>
     <style>
-        :root {
-            --neon-blue: #00f3ff;
-            --matrix-dark: #020b14;
-            --panel-bg: rgba(6, 26, 44, 0.45);
-        }
-
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            background-color: var(--matrix-dark); color: var(--neon-blue);
-            font-family: 'Courier New', monospace; height: 100vh;
-            display: grid; grid-template-rows: auto 1fr auto; overflow: hidden;
+            background-color: #02080d; color: #52b3d9; font-family: 'Courier New', Courier, monospace;
+            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            height: 100vh; overflow: hidden; padding: 20px; position: relative;
         }
-
-        /* Ambient Grid */
-        body::after {
-            content: ''; position: absolute; inset: 0; pointer-events: none;
-            background-image: linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
-            background-size: 40px 40px; z-index: 1;
-        }
-
-        header { padding: 15px; text-align: center; font-size: 11px; letter-spacing: 4px; border-bottom: 1px solid rgba(0,243,255,0.2); z-index: 5; }
-
-        /* The Swarm Stage */
-        .stage { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; z-index: 2; }
-        #swarmCanvas { position: absolute; inset: 0; }
         
-        .jarvis-orb {
-            width: 130px; height: 130px; border-radius: 50%;
-            border: 2px solid var(--neon-blue); display: flex; align-items: center; justify-content: center;
-            background: radial-gradient(circle, #02182b, #052a45);
-            box-shadow: 0 0 40px rgba(0, 243, 255, 0.3); z-index: 10; cursor: pointer;
-            transition: transform 0.3s;
-        }
-        .jarvis-orb:active { transform: scale(0.95); }
+        /* Particle Layer */
+        #swarmCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
 
-        footer { padding: 15px; border-top: 1px solid rgba(0, 243, 255, 0.2); background: var(--panel-bg); z-index: 5; }
-        .terminal { font-size: 12px; margin-bottom: 10px; padding: 5px; color: #fff; }
+        .header { width: 100%; display: flex; justify-content: space-between; font-size: 11px; letter-spacing: 2px; border-bottom: 1px solid rgba(82, 179, 217, 0.2); padding-bottom: 8px; z-index: 5; }
+        .history-toggle { color: #52b3d9; cursor: pointer; text-decoration: underline; font-weight: bold; }
+        
+        .orb-container { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; width: 100%; z-index: 5; }
+        .jarvis-orb {
+            width: 200px; height: 200px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(2,15,26,0.8) 0%, rgba(5,42,69,0.2) 60%);
+            border: 2px dashed rgba(82, 179, 217, 0.4); position: relative; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 30px rgba(82, 179, 217, 0.15); transition: all 0.3s ease; cursor: pointer;
+        }
+        .jarvis-orb::before { content: ''; position: absolute; width: 160px; height: 160px; border-radius: 50%; border: 3px double #52b3d9; box-shadow: 0 0 15px rgba(82, 179, 217, 0.4); animation: rotateOrb 12s linear infinite; }
+        .jarvis-orb::after { content: ''; position: absolute; width: 100px; height: 100px; border-radius: 50%; border: 1px solid #00ffcc; box-shadow: inset 0 0 15px rgba(0, 255, 204, 0.2); animation: pulseCore 2.5s ease-in-out infinite; }
+        .jarvis-orb.listening { border-color: #00ffcc; box-shadow: 0 0 40px rgba(0, 255, 204, 0.5); }
+        .jarvis-orb.speaking { border-color: #ff3366; box-shadow: 0 0 40px rgba(255, 51, 102, 0.5); }
+        
+        @keyframes rotateOrb { 100% { transform: rotate(360deg); } }
+        @keyframes pulseCore { 0%, 100% { transform: scale(0.95); opacity: 0.5; } 50% { transform: scale(1.05); opacity: 1; } }
+        
+        .display-panel { width: 100%; max-height: 120px; background: rgba(5, 24, 38, 0.7); border: 1px solid rgba(82, 179, 217, 0.25); border-radius: 6px; padding: 12px; font-size: 13px; overflow-y: auto; text-align: center; margin-bottom: 12px; z-index: 5; }
+        .user-text { color: #ffffff; margin-bottom: 4px; font-style: italic; }
+        .luna-text { color: #00ffcc; font-weight: bold; text-shadow: 0 0 4px rgba(0,255,204,0.3); }
+        
+        .control-deck { width: 100%; display: flex; flex-direction: column; gap: 10px; align-items: center; z-index: 5; }
+        .text-input-container { display: flex; width: 100%; background: rgba(5, 24, 38, 0.8); border: 1px solid rgba(82, 179, 217, 0.4); border-radius: 4px; overflow: hidden; }
+        .jarvis-input { flex: 1; background: transparent; border: none; outline: none; color: #ffffff; padding: 12px; font-family: inherit; font-size: 14px; }
+        .send-btn { background: rgba(82, 179, 217, 0.15); border: none; border-left: 1px solid rgba(82, 179, 217, 0.4); color: #52b3d9; padding: 0 16px; cursor: pointer; font-family: inherit; font-weight: bold; }
+        .voice-trigger-btn { background: transparent; border: 1px dashed #52b3d9; color: #52b3d9; padding: 12px; font-size: 12px; font-family: inherit; letter-spacing: 2px; text-transform: uppercase; border-radius: 4px; cursor: pointer; width: 100%; text-align: center; }
+        
+        .history-drawer { position: absolute; top: 0; left: -100%; width: 90%; height: 100%; background: rgba(2, 10, 18, 0.98); border-right: 2px solid #52b3d9; z-index: 20; transition: left 0.3s cubic-bezier(0.1, 0.9, 0.2, 1); padding: 20px; display: flex; flex-direction: column; }
+        .history-drawer.open { left: 0; }
+        .drawer-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #52b3d9; padding-bottom: 12px; margin-bottom: 15px; }
+        .history-log-container { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .history-item { font-size: 12px; padding: 10px; border-radius: 4px; border: 1px solid rgba(82, 179, 217, 0.15); }
+        .hist-user { color: #ffffff; border-left: 3px solid #52b3d9; }
+        .hist-luna { color: #00ffcc; border-left: 3px solid #00ffcc; }
+        .wipe-btn { background: rgba(255, 51, 102, 0.05); border: 1px dashed #ff3366; color: #ff3366; padding: 12px; font-size: 11px; cursor: pointer; margin-top: 15px; width: 100%; }
     </style>
 </head>
 <body>
 
-    <header>LUNA_QUANTUM_CORE_V4</header>
+    <canvas id="swarmCanvas"></canvas>
 
-    <div class="stage">
-        <canvas id="swarmCanvas"></canvas>
-        <div class="jarvis-orb" id="orb">STABLE</div>
+    <div class="header">
+        <div>SYS: LUNA CORE V3.3</div>
+        <div class="history-toggle" id="openHistoryBtn">📝 CHAT LOGS</div>
     </div>
 
-    <footer>
-        <div class="terminal" id="displayPanel">Luna: System ready.</div>
-    </footer>
+    <div id="historyDrawer" class="history-drawer">
+        <div class="drawer-header">
+            <span class="drawer-title">CORE_MEMORY_LOGS.log</span>
+            <span class="close-drawer" id="closeHistoryBtn">[DISENGAGE]</span>
+        </div>
+        <div id="historyLogContainer" class="history-log-container"></div>
+        <button id="wipeMemoryBtn" class="wipe-btn">WIPE SECURE ARCHIVE CACHE</button>
+    </div>
+
+    <div class="orb-container">
+        <div id="jarvisOrb" class="jarvis-orb">
+            <span id="orbStateText" style="font-size: 10px; letter-spacing: 1px;">TAP TO TALK</span>
+        </div>
+    </div>
+
+    <div id="displayPanel" class="display-panel">
+        <div class="luna-text">Vocal systems fully initialized. Systems clear, Ayush.</div>
+    </div>
+
+    <div class="control-deck">
+        <div class="text-input-container">
+            <input type="text" id="keyboardInput" class="jarvis-input" placeholder="Transmit text directive..." autocomplete="off">
+            <button id="sendTextBtn" class="send-btn">SEND</button>
+        </div>
+        <button id="voiceTalkBtn" class="voice-trigger-btn">ENGAGE MIC COUPLING</button>
+    </div>
 
     <script>
+        // --- Particle Swarm Engine ---
         const canvas = document.getElementById('swarmCanvas');
         const ctx = canvas.getContext('2d');
+        let width, height;
         
-        // --- 1. Quantum Swarm Logic ---
         function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
         }
         window.addEventListener('resize', resize);
         resize();
 
         const dots = Array.from({ length: 100 }, () => ({
             angle: Math.random() * Math.PI * 2,
-            speed: (Math.random() - 0.5) * 0.04,
-            radius: 100 + Math.random() * 100
+            speed: (Math.random() - 0.5) * 0.03,
+            radius: 120 + Math.random() * 150
         }));
 
-        function draw() {
-            ctx.fillStyle = 'rgba(2, 11, 20, 0.15)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            const centerX = canvas.width / 2, centerY = canvas.height / 2;
-
-            dots.forEach(dot => {
-                dot.angle += dot.speed;
-                const x = centerX + Math.cos(dot.angle) * dot.radius;
-                const y = centerY + Math.sin(dot.angle) * dot.radius;
+        function drawSwarm() {
+            ctx.fillStyle = 'rgba(2, 8, 13, 0.15)';
+            ctx.fillRect(0, 0, width, height);
+            const centerX = width / 2, centerY = height / 2;
+            dots.forEach(d => {
+                d.angle += d.speed;
                 ctx.beginPath();
-                ctx.arc(x, y, 1.5, 0, Math.PI * 2);
-                ctx.fillStyle = varColor('--neon-blue');
+                ctx.arc(centerX + Math.cos(d.angle) * d.radius, centerY + Math.sin(d.angle) * d.radius, 1.5, 0, Math.PI * 2);
+                ctx.fillStyle = '#52b3d9';
                 ctx.fill();
             });
-            requestAnimationFrame(draw);
+            requestAnimationFrame(drawSwarm);
         }
-        function varColor(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
-        draw();
+        drawSwarm();
 
-        // --- 2. Keep your existing logic for SpeechRecognition/Synthesis here ---
-        // Your existing handleKeyboardTransmission and executeNeuralVoiceSpeaker logic 
-        // will integrate perfectly within this new structural grid.
+        // --- Keep all your existing history/voice logic below this line ---
+        // (The original code handles the interaction, input, and voice synth perfectly)
+        // [Existing JavaScript logic goes here]
     </script>
 </body>
 </html>
