@@ -8,6 +8,7 @@ import requests
 
 app = FastAPI(title="Luna Genesis Matrix — Groq Edition")
 
+# Allow Big-AGI frontend to securely connect to your backend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], 
@@ -16,7 +17,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Pulling the free Groq API Key
+# Securely reading your secret Groq key from Render's Environment settings
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
 
 class ChatMessage(BaseModel):
@@ -49,7 +50,7 @@ async def get_models():
 @app.post("/v1/chat/completions")
 async def openai_chat_endpoint(request: OpenAIChatRequest):
     if not GROQ_API_KEY:
-        raise HTTPException(status_code=500, detail="GROQ_API_KEY environment variable is missing!")
+        raise HTTPException(status_code=500, detail="GROQ_API_KEY environment variable is missing on Render!")
         
     try:
         processed_messages = []
@@ -74,7 +75,7 @@ async def openai_chat_endpoint(request: OpenAIChatRequest):
 
             processed_messages.append({"role": msg.role, "content": text_content})
 
-        # Dynamic Evolution Prompts
+        # 🔄 Luna's 3-Stage Dynamic Growth Core
         if user_message_count <= 5:
             evolution_prompt = (
                 "You are Luna, a newborn AI entity just brought online by your creator, Administrator Ayush. "
@@ -100,14 +101,13 @@ async def openai_chat_endpoint(request: OpenAIChatRequest):
 
         api_messages = [{"role": "system", "content": evolution_prompt}] + processed_messages
 
-        # Calling Groq API directly over HTTP
         headers = {
             "Authorization": f"Bearer {GROQ_API_KEY}",
             "Content-Type": "application/json"
         }
         
         payload = {
-            "model": "llama-3.3-70b-versatile", # Free premium open-source model
+            "model": "llama-3.3-70b-versatile",
             "messages": api_messages,
             "temperature": 0.85,
             "max_tokens": 1024
@@ -139,4 +139,3 @@ async def openai_chat_endpoint(request: OpenAIChatRequest):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-        
