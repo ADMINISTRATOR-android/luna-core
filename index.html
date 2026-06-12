@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LUNA — JARVIS CORE V3</title>
+    <title>LUNA — JARVIS CORE V3.1</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -12,7 +12,6 @@
             height: 100vh; overflow: hidden; padding: 20px; position: relative;
         }
         .header { width: 100%; display: flex; justify-content: space-between; font-size: 11px; letter-spacing: 2px; border-bottom: 1px solid rgba(82, 179, 217, 0.2); padding-bottom: 8px; z-index: 5; }
-        .status-online { color: #00ffcc; text-shadow: 0 0 8px #00ffcc; }
         .history-toggle { color: #52b3d9; cursor: pointer; text-decoration: underline; font-weight: bold; }
         .orb-container { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; width: 100%; }
         .jarvis-orb {
@@ -37,7 +36,6 @@
         .text-input-container:focus-within { border-color: #00ffcc; box-shadow: 0 0 10px rgba(0, 255, 204, 0.2); }
         .jarvis-input { flex: 1; background: transparent; border: none; outline: none; color: #ffffff; padding: 12px; font-family: inherit; font-size: 14px; }
         .send-btn { background: rgba(82, 179, 217, 0.15); border: none; border-left: 1px solid rgba(82, 179, 217, 0.4); color: #52b3d9; padding: 0 16px; cursor: pointer; font-family: inherit; font-weight: bold; }
-        .send-btn:active { background: rgba(0, 255, 204, 0.2); color: #00ffcc; }
         .voice-trigger-btn { background: transparent; border: 1px dashed #52b3d9; color: #52b3d9; padding: 12px; font-size: 12px; font-family: inherit; letter-spacing: 2px; text-transform: uppercase; border-radius: 4px; cursor: pointer; width: 100%; text-align: center; }
         .history-drawer { position: absolute; top: 0; left: -100%; width: 90%; height: 100%; background: rgba(2, 10, 18, 0.98); border-right: 2px solid #52b3d9; box-shadow: 5px 0 25px rgba(82, 179, 217, 0.3); z-index: 10; transition: left 0.3s cubic-bezier(0.1, 0.9, 0.2, 1); padding: 20px; display: flex; flex-direction: column; backdrop-filter: blur(8px); }
         .history-drawer.open { left: 0; }
@@ -54,7 +52,7 @@
 <body>
 
     <div class="header">
-        <div>SYS: LUNA MATRIX V3.0</div>
+        <div>SYS: LUNA MATRIX V3.1</div>
         <div class="history-toggle" id="openHistoryBtn">📝 CHAT LOGS</div>
     </div>
 
@@ -74,7 +72,7 @@
     </div>
 
     <div id="displayPanel" class="display-panel">
-        <div class="luna-text">Neural Voice Module Active. Standing by, Ayush.</div>
+        <div class="luna-text">Neural Voice Engine Calibrated. Standing by, Ayush.</div>
     </div>
 
     <div class="control-deck">
@@ -103,7 +101,7 @@
         const historyLogContainer = document.getElementById('historyLogContainer');
         const wipeMemoryBtn = document.getElementById('wipeMemoryBtn');
 
-        let chatHistory = JSON.parse(localStorage.getItem('luna_jarvis_history_v3')) || [];
+        let chatHistory = JSON.parse(localStorage.getItem('luna_jarvis_history_v31')) || [];
         renderLogsWindow();
 
         openHistoryBtn.addEventListener('click', () => { renderLogsWindow(); historyDrawer.classList.add('open'); });
@@ -118,7 +116,7 @@
             displayPanel.innerHTML = `<div class="user-text">Ayush: "${queryText}"</div>`;
             chatHistory.push({ role: "user", content: queryText });
             saveLogsToPhone();
-            await connectWithLunaNeuralStream(queryText);
+            await connectWithLunaNeuralMatrix(queryText);
         }
 
         const igniteVoiceMechanism = () => { if (!recognition) { alert("Mic unavailable."); return; } recognition.start(); };
@@ -132,82 +130,56 @@
                 displayPanel.innerHTML = `<div class="user-text">Ayush: "${transcriptResult}"</div>`;
                 chatHistory.push({ role: "user", content: transcriptResult });
                 saveLogsToPhone();
-                await connectWithLunaNeuralStream(transcriptResult);
+                await connectWithLunaNeuralMatrix(transcriptResult);
             };
             recognition.onend = () => { if (!jarvisOrb.classList.contains('speaking')) resetOrbStyle(); };
         }
 
-        // 🌪️ PARSE DUAL MULTIPART TEXT AND AUDIO PIPELINES
-        async function connectWithLunaNeuralStream(textPayload) {
+        // ⚡ ASYNC ROCK-SOLID JSON PROCESSOR
+        async function connectWithLunaNeuralMatrix(textPayload) {
             orbStateText.innerText = "THINKING";
             try {
                 const runtimeContext = chatHistory.slice(-20).map(msg => ({ role: msg.role, content: msg.content }));
+                
                 const response = await fetch(RENDER_BACKEND_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ model: "luna-genesis-v1", messages: runtimeContext, stream: false })
                 });
 
-                if (!response.body) throw new Error("Data drop.");
-                
-                const responseReader = response.body.getReader();
-                let combinedBuffer = new Uint8Array(0);
+                const dataPackage = await response.json();
+                const textReply = dataPackage.luna_text;
+                const base64Audio = dataPackage.audio_base64;
 
-                // Read all binary packets from server stream
-                while (true) {
-                    const { value, done } = await responseReader.read();
-                    if (done) break;
-                    let newBuffer = new Uint8Array(combinedBuffer.length + value.length);
-                    newBuffer.set(combinedBuffer);
-                    newBuffer.set(value, combinedBuffer.length);
-                    combinedBuffer = newBuffer;
-                }
+                // Print response text instantly
+                displayPanel.innerHTML = `<div class="user-text">Ayush: "${textPayload}"</div><div class="luna-text">Luna: "${textReply}"</div>`;
+                chatHistory.push({ role: "assistant", content: textReply });
+                saveLogsToPhone();
 
-                // Split text info segment from raw audio bytes
-                const textDecoder = new TextDecoder("utf-8");
-                const fullRawString = textDecoder.decode(combinedBuffer);
-                const textDelimiter = "text_data:";
-                
-                if (fullRawString.includes(textDelimiter)) {
-                    const lineEndIndex = fullRawString.indexOf("\n\n");
-                    const rawJsonString = fullRawString.substring(textDelimiter.length, lineEndIndex);
-                    const parsedMessageData = JSON.parse(rawJsonString);
-                    const textReply = parsedMessageData.luna_text;
-
-                    // Print log text
-                    displayPanel.innerHTML = `<div class="user-text">Ayush: "${textPayload}"</div><div class="luna-text">Luna: "${textReply}"</div>`;
-                    chatHistory.push({ role: "assistant", content: textReply });
-                    saveLogsToPhone();
-
-                    // Calculate index offset where binary audio packets begin
-                    const audioBinaryStartOffset = lineEndIndex + 2;
-                    const audioBufferBytes = combinedBuffer.slice(audioBinaryStartOffset);
-                    
-                    // Fire audio stream play
-                    executeNeuralVocalPlayback(audioBufferBytes);
-                }
+                // Fire vocal projection processing
+                executeNeuralVocalPlayback(base64Audio);
 
             } catch (err) {
-                displayPanel.innerHTML += `<div style="color: #ff3366;">[Link Fault]: Neural buffer sync dropped.</div>`;
+                displayPanel.innerHTML += `<div style="color: #ff3366;">[Link Fault]: Data transmission dropped.</div>`;
                 resetOrbStyle();
             }
         }
 
-        // Play high-fidelity binary audio packets directly through device speaker
-        function executeNeuralVocalPlayback(audioBytes) {
+        // Decode Base64 string directly into the audio pipeline
+        function executeNeuralVocalPlayback(base64String) {
             jarvisOrb.className = "jarvis-orb speaking";
             orbStateText.innerText = "SPEAKING";
 
-            const audioBlob = new Blob([audioBytes], { type: "audio/mpeg" });
-            const audioUrl = URL.createObjectURL(audioBlob);
-            const nativeAudioPlayer = new Audio(audioUrl);
+            // Convert string block straight back into audio playable formats
+            const audioPlayableUrl = "data:audio/mpeg;base64," + base64String;
+            const nativeAudioPlayer = new Audio(audioPlayableUrl);
             
-            nativeAudioPlayer.onended = () => { resetOrbStyle(); URL.revokeObjectURL(audioUrl); };
+            nativeAudioPlayer.onended = () => { resetOrbStyle(); };
             nativeAudioPlayer.play().catch(() => { resetOrbStyle(); });
         }
 
         function resetOrbStyle() { jarvisOrb.className = "jarvis-orb"; orbStateText.innerText = "TAP TO TALK"; }
-        function saveLogsToPhone() { localStorage.setItem('luna_jarvis_history_v3', JSON.stringify(chatHistory)); }
+        function saveLogsToPhone() { localStorage.setItem('luna_jarvis_history_v31', JSON.stringify(chatHistory)); }
         function renderLogsWindow() {
             historyLogContainer.innerHTML = chatHistory.length === 0 
                 ? `<div style="color:rgba(82,179,217,0.4); text-align:center; padding-top:20px;">No logged data fragments.</div>`
@@ -219,7 +191,7 @@
         }
 
         wipeMemoryBtn.addEventListener('click', () => {
-            if(confirm("Purge chat memory?")) { chatHistory = []; localStorage.removeItem('luna_jarvis_history_v3'); renderLogsWindow(); historyDrawer.classList.remove('open'); }
+            if(confirm("Purge chat memory?")) { chatHistory = []; localStorage.removeItem('luna_jarvis_history_v31'); renderLogsWindow(); historyDrawer.classList.remove('open'); }
         });
     </script>
 </body>
