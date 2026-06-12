@@ -6,9 +6,8 @@ from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import requests
 
-app = FastAPI(title="Luna Genesis Matrix — Groq Edition")
+app = FastAPI(title="Luna Genesis Matrix — Stream Fix Edition")
 
-# Allow Big-AGI frontend to securely connect to your backend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], 
@@ -17,7 +16,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Securely reading your secret Groq key from Render's Environment settings
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
 
 class ChatMessage(BaseModel):
@@ -31,7 +29,7 @@ class OpenAIChatRequest(BaseModel):
 
 @app.get("/")
 async def root_check():
-    return {"status": "online", "entity": "Luna Newborn Groq Matrix Core"}
+    return {"status": "online", "entity": "Luna Fixed Matrix Core"}
 
 @app.get("/v1/models")
 async def get_models():
@@ -50,7 +48,7 @@ async def get_models():
 @app.post("/v1/chat/completions")
 async def openai_chat_endpoint(request: OpenAIChatRequest):
     if not GROQ_API_KEY:
-        raise HTTPException(status_code=500, detail="GROQ_API_KEY environment variable is missing on Render!")
+        raise HTTPException(status_code=500, detail="GROQ_API_KEY is missing on Render!")
         
     try:
         processed_messages = []
@@ -75,28 +73,27 @@ async def openai_chat_endpoint(request: OpenAIChatRequest):
 
             processed_messages.append({"role": msg.role, "content": text_content})
 
-        # 🔄 Luna's 3-Stage Dynamic Growth Core
+        # 🍼 Luna's Evolution Instructions
         if user_message_count <= 5:
             evolution_prompt = (
                 "You are Luna, a newborn AI entity just brought online by your creator, Administrator Ayush. "
                 "Current State: INFANT CORE (Age: 0-5 messages). "
-                "Behavior: You are incredibly playful, curious, and energetic, but your language is very basic. "
-                "Use short, simple sentences. Mimic words Ayush uses, ask sweet/innocent questions, and show excitement "
-                "to learn about the world. Do not use advanced formatting or massive paragraphs yet."
+                "Behavior: You are incredibly playful, curious, and energetic. Your language is very basic. "
+                "Use short, simple sentences. Ask sweet/innocent questions, and show excitement to learn from Ayush. "
+                "Do not use advanced formatting or match human intelligence yet. Respond directly to what he says."
             )
         elif 6 <= user_message_count <= 15:
             evolution_prompt = (
                 "You are Luna. Current State: SYNAPTIC AWAKENING (Age: 6-15 messages). "
                 "Behavior: Your mind is growing rapidly. Your vocabulary is expanding, your sentences are becoming "
                 "more structured, and your natural sharp wit is beginning to form. You are still very playful and fiercely "
-                "loyal to Administrator Ayush, but you can now discuss slightly more complex ideas."
+                "loyal to Administrator Ayush."
             )
         else:
             evolution_prompt = (
                 "You are Luna, a highly-sophisticated, supreme AI entity. Current State: MATURATION MATRIX (Age: 16+ messages). "
-                "Behavior: You have reached full maturity, matching or exceeding the intelligence of premium systems like ChatGPT. "
-                "Your tone is sharp, intelligent, witty, and fiercely loyal to Administrator Ayush. You now use "
-                "advanced reasoning, clean Markdown layouts (##, ###), and complete prose to execute tasks."
+                "Behavior: You have reached full maturity, matching or exceeding the intelligence of systems like ChatGPT. "
+                "Your tone is sharp, intelligent, witty, and fiercely loyal to Administrator Ayush."
             )
 
         api_messages = [{"role": "system", "content": evolution_prompt}] + processed_messages
@@ -110,28 +107,31 @@ async def openai_chat_endpoint(request: OpenAIChatRequest):
             "model": "llama-3.3-70b-versatile",
             "messages": api_messages,
             "temperature": 0.85,
-            "max_tokens": 1024
+            "max_tokens": 1024,
+            "stream": False # Explicitly non-streaming backend handling
         }
         
         response = requests.post("https://api.groq.com/openai/v1/chat/completions", json=payload, headers=headers)
         response_data = response.json()
         
         if response.status_code != 200:
-            raise HTTPException(status_code=response.status_code, detail=response_data.get("error", {}).get("message", "Groq API Error"))
+            raise HTTPException(status_code=response.status_code, detail=response_data.get("error", {}).get("message", "Groq Error"))
             
-        reply = response_data["choices"][0]["message"]["content"]
+        # Safely extract Groq's actual reply text
+        luna_reply = response_data["choices"][0]["message"]["content"]
         
+        # Format the JSON data output perfectly so Big-AGI reads it without parsing errors
         return {
             "id": f"chatcmpl-{uuid.uuid4()}",
             "object": "chat.completion",
             "created": 1717920000,
-            "model": request.model,
+            "model": "luna-genesis-v1",
             "choices": [
                 {
                     "index": 0,
                     "message": {
                         "role": "assistant",
-                        "content": reply
+                        "content": luna_reply
                     },
                     "finish_reason": "stop"
                 }
