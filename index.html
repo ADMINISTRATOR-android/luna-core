@@ -3,363 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LUNA — HEAVY QUANTUM MATRIX V6.0</title>
+    <title>LUNA — JARVIS CORE V3.3</title>
     <style>
-        :root {
-            --neon-blue: #00f3ff;
-            --neon-glow: rgba(0, 243, 255, 0.4);
-            --matrix-dark: #01060c;
-            --panel-bg: rgba(2, 16, 29, 0.6);
-            --border-glow: rgba(0, 243, 255, 0.15);
-            --neon-pink: #ff2a6d;
-            --neon-green: #05ff9e;
-            --grid-color: rgba(0, 243, 255, 0.02);
-        }
-
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
         body {
-            background-color: var(--matrix-dark);
-            color: #70b9d9;
-            font-family: 'Courier New', Courier, monospace;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-            padding: 10px;
-            position: relative;
+            background-color: #02080d; color: #52b3d9; font-family: 'Courier New', Courier, monospace;
+            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            height: 100vh; overflow: hidden; padding: 20px; position: relative;
         }
-
-        /* Sci-Fi Digital Grid Background */
-        body::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: linear-gradient(var(--grid-color) 1px, transparent 1px),
-                              linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-            background-size: 20px 20px; z-index: 1; pointer-events: none;
-        }
-
-        /* HUD Header */
-        .hud-header {
-            width: 100%; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
-            border: 1px solid var(--border-glow); background: var(--panel-bg); backdrop-filter: blur(8px);
-            padding: 8px 12px; font-size: 10px; letter-spacing: 2px; z-index: 10;
-        }
-        .sys-title { font-weight: bold; color: var(--neon-blue); text-shadow: 0 0 6px var(--neon-glow); }
-        .sys-status { text-align: center; color: var(--neon-green); display: flex; align-items: center; gap: 6px; justify-content: center; }
-        .pulse-dot { width: 4px; height: 4px; background: var(--neon-green); border-radius: 50%; animation: blink 1s infinite; }
-        .history-trigger { text-align: right; color: #70b9d9; cursor: pointer; }
-
-        /* Main Stage Frame */
-        .hud-container {
-            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            position: relative; width: 100%; z-index: 2; perspective: 1200px;
-        }
-
-        /* ⚛️ HEAVY ATOMIC MULTI-ORBIT STAGE */
-        .nuclear-stage {
-            position: relative; display: flex; align-items: center; justify-content: center;
-            width: 360px; height: 360px; transform-style: preserve-3d;
-            animation: structureFloat 10s ease-in-out infinite; /* Slower overall ambient float */
-        }
-
-        /* Base Calibration Ring */
-        .hud-bracket {
-            position: absolute; width: 340px; height: 340px;
-            border: 1px dashed rgba(0, 243, 255, 0.03); border-radius: 50%;
-            transform: rotateX(80deg);
-        }
-
-        /* Base Specifications for all Elliptical Orbit Tracks */
-        .electron-orbit {
-            position: absolute;
-            width: 340px;
-            height: 110px;
-            border: 1px solid rgba(0, 243, 255, 0.12);
-            border-radius: 50%;
-            transform-style: preserve-3d;
-        }
-
-        /* Traveling Electron Nodes */
-        .electron-orbit::after {
-            content: ''; position: absolute; top: 50%; left: 0;
-            width: 7px; height: 7px;
-            border-radius: 50%; box-shadow: 0 0 14px currentColor, 0 0 4px #ffffff;
-            transform: translate(-3.5px, -3.5px);
-        }
-
-        /* 🪐 7-ORBIT KINETIC REGIME (Slowing down processing cycle) */
-        
-        /* Orbit 1: 30 Deg Skew - Neon Blue (Slowed to 7s) */
-        .orbit-1 { color: var(--neon-blue); transform: rotateZ(30deg) rotateX(68deg); animation: quantumLoop 7s linear infinite; }
-        .orbit-1::after { background: var(--neon-blue); }
-
-        /* Orbit 2: -30 Deg Skew Counter-track - Neon Green (Slowed to 5.5s) */
-        .orbit-2 { color: var(--neon-green); transform: rotateZ(-30deg) rotateX(68deg); animation: quantumLoop 5.5s linear infinite reverse; animation-delay: -1s; }
-        .orbit-2::after { background: var(--neon-green); }
-
-        /* Orbit 3: 65 Deg Vertical Shift - Neon Pink (Slowed to 9s) */
-        .orbit-3 { color: var(--neon-pink); transform: rotateZ(65deg) rotateX(72deg); animation: quantumLoop 9s linear infinite; animation-delay: -2.5s; }
-        .orbit-3::after { background: var(--neon-pink); }
-
-        /* Orbit 4: -65 Deg Vertical Shift Counter-track - Neon Blue (Slowed to 8s) */
-        .orbit-4 { color: var(--neon-blue); transform: rotateZ(-65deg) rotateX(72deg); animation: quantumLoop 8s linear infinite reverse; animation-delay: -4s; }
-        .orbit-4::after { background: var(--neon-blue); }
-
-        /* Orbit 5: Deep 90 Deg Vertical Meridian Axis (Slowed to 11s) */
-        .orbit-5 { color: #ffaa00; transform: rotateZ(90deg) rotateX(75deg); animation: quantumLoop 11s linear infinite; animation-delay: -1.5s; }
-        .orbit-5::after { background: #ffaa00; }
-
-        /* Orbit 6: Low Plane Horizontal Ring (Slowed to 13s) */
-        .orbit-6 { color: var(--neon-green); transform: rotateZ(10deg) rotateX(60deg); width: 290px; height: 95px; animation: quantumLoop 13s linear infinite reverse; }
-        .orbit-6::after { background: var(--neon-green); }
-
-        /* Orbit 7: High Steep Cross-cutting Track (Slowed to 10s) */
-        .orbit-7 { color: var(--neon-pink); transform: rotateZ(-115deg) rotateX(64deg); width: 310px; height: 105px; animation: quantumLoop 10s linear infinite; }
-        .orbit-7::after { background: var(--neon-pink); }
-
-
-        /* Core Reactor Nucleus */
+        .header { width: 100%; display: flex; justify-content: space-between; font-size: 11px; letter-spacing: 2px; border-bottom: 1px solid rgba(82, 179, 217, 0.2); padding-bottom: 8px; z-index: 5; }
+        .history-toggle { color: #52b3d9; cursor: pointer; text-decoration: underline; font-weight: bold; }
+        .orb-container { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; width: 100%; }
         .jarvis-orb {
-            width: 105px; height: 105px; border-radius: 50%;
-            background: radial-gradient(circle, rgba(0,243,255,0.2) 0%, rgba(2,12,24,0.95) 65%, transparent 100%);
-            border: 2px solid rgba(0, 243, 255, 0.45);
-            position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            box-shadow: 0 0 30px rgba(0, 243, 255, 0.25), inset 0 0 15px rgba(0, 243, 255, 0.15);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; z-index: 10;
+            width: 200px; height: 200px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(2,15,26,1) 0%, rgba(5,42,69,0.3) 60%, rgba(82,179,217,0.05) 100%);
+            border: 2px dashed rgba(82, 179, 217, 0.4); position: relative; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 30px rgba(82, 179, 217, 0.15); transition: all 0.3s ease; cursor: pointer;
         }
-
-        /* Inner Heavy Energy Proton Mass */
-        .jarvis-orb::after {
-            content: ''; position: absolute; width: 38px; height: 38px; border-radius: 50%;
-            background: radial-gradient(circle, #ffffff 0%, rgba(0,243,255,0.6) 50%, transparent 100%);
-            box-shadow: 0 0 25px var(--neon-blue);
-            animation: nucleusEnergy 2s ease-in-out infinite alternate; /* Slower, pulsing core energy */
-        }
-
-        /* 🎛️ RE-GEN STRUCTURAL SYSTEM MATRIX MODES */
-        .jarvis-orb.listening { border-color: var(--neon-green); box-shadow: 0 0 40px rgba(5, 255, 158, 0.4); }
-        .jarvis-orb.listening::after { background: var(--neon-green); box-shadow: 0 0 30px var(--neon-green); animation-duration: 0.8s; }
-
-        .jarvis-orb.thinking { border-color: #ffaa00; animation: atomicJitter 0.2s infinite; }
-        .jarvis-orb.thinking::after { background: #ffaa00; box-shadow: 0 0 25px #ffaa00; }
-
-        .jarvis-orb.speaking { border-color: var(--neon-pink); box-shadow: 0 0 45px rgba(255, 42, 109, 0.5); }
-        .jarvis-orb.speaking::after { background: var(--neon-pink); box-shadow: 0 0 35px var(--neon-pink); animation: speakSpike 0.15s linear infinite alternate; }
-
-        #orbLabel { font-size: 8px; font-weight: bold; letter-spacing: 2px; color: var(--neon-blue); z-index: 15; margin-top: 2px; text-shadow: 0 0 4px var(--neon-blue); pointer-events: none; }
-
-        /* Tactical Terminal Console Display Deck */
-        .display-deck {
-            width: 100%; background: var(--panel-bg); border: 1px solid var(--border-glow); border-radius: 4px;
-            padding: 12px; min-height: 95px; max-height: 125px; overflow-y: auto; backdrop-filter: blur(8px);
-            margin-bottom: 12px; box-shadow: inset 0 0 10px rgba(0, 243, 255, 0.05); z-index: 10;
-        }
-        .terminal-row { font-size: 12px; line-height: 1.5; text-align: center; }
-        .user-node { color: #ffffff; opacity: 0.9; }
-        .luna-node { color: var(--neon-blue); font-weight: bold; text-shadow: 0 0 6px rgba(0,243,255,0.3); }
-
-        /* Controls Input Deck */
-        .hud-footer { width: 100%; display: flex; flex-direction: column; gap: 8px; z-index: 10; }
-        .input-bar-container {
-            display: flex; width: 100%; background: rgba(1, 8, 15, 0.9);
-            border: 1px solid rgba(0, 243, 255, 0.25); border-radius: 4px; overflow: hidden;
-        }
-        .input-bar-container:focus-within { border-color: var(--neon-blue); box-shadow: 0 0 12px rgba(0, 243, 255, 0.2); }
-        .matrix-input { flex: 1; background: transparent; border: none; outline: none; color: #ffffff; padding: 12px; font-family: inherit; font-size: 13px; }
-        .matrix-send-btn { background: rgba(0, 243, 255, 0.06); border: none; border-left: 1px solid rgba(0, 243, 255, 0.25); color: var(--neon-blue); padding: 0 20px; cursor: pointer; font-family: inherit; font-weight: bold; font-size: 11px; }
-        .coupling-btn { background: transparent; border: 1px dashed rgba(0, 243, 255, 0.3); color: var(--neon-blue); padding: 10px; font-size: 10px; font-family: inherit; letter-spacing: 2px; text-transform: uppercase; border-radius: 4px; cursor: pointer; text-align: center; }
-
-        /* Sliding Data Drawer Overlay */
-        .memory-drawer {
-            position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
-            background: rgba(1, 6, 12, 0.99); border-right: 1px solid var(--neon-blue);
-            z-index: 25; transition: left 0.4s cubic-bezier(0.075, 0.82, 0.165, 1);
-            padding: 20px; display: flex; flex-direction: column; backdrop-filter: blur(10px);
-        }
-        .memory-drawer.open { left: 0; }
-        .drawer-hud { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0, 243, 255, 0.2); padding-bottom: 12px; margin-bottom: 15px; }
-        .drawer-title { font-weight: bold; letter-spacing: 1px; color: var(--neon-blue); font-size: 12px; }
-        .drawer-close { color: var(--neon-pink); cursor: pointer; font-size: 11px; }
-        .log-stream { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .log-card { font-size: 11px; padding: 10px; border-radius: 4px; background: rgba(255,255,255,0.01); border: 1px solid rgba(0, 243, 255, 0.05); }
-        .log-user { border-left: 2px solid #ffffff; color: #ffffff; }
-        .log-luna { border-left: 2px solid var(--neon-blue); color: var(--neon-blue); }
-        .purge-btn { background: transparent; border: 1px dashed #ff2a6d; color: #ff2a6d; padding: 10px; font-family: inherit; font-size: 10px; border-radius: 4px; cursor: pointer; margin-top: 12px; }
-
-        /* 🎬 ATOMIC QUANTUM KINETIC ENGINES */
-        @keyframes quantumLoop {
-            0% { transform: inherit; }
-            100% { transform: inherit; rotate: 360deg; }
-        }
-        @keyframes structureFloat {
-            0%, 100% { transform: translateY(0px) rotateY(-6deg) rotateX(3deg); }
-            50% { transform: translateY(-6px) rotateY(6deg) rotateX(-3deg); }
-        }
-        @keyframes nucleusEnergy {
-            0% { transform: scale(0.92); opacity: 0.7; }
-            100% { transform: scale(1.05); opacity: 1; }
-        }
-        @keyframes speakSpike {
-            0% { transform: scale(0.85); filter: drop-shadow(0 0 5px var(--neon-pink)); }
-            100% { transform: scale(1.2); filter: drop-shadow(0 0 20px var(--neon-pink)); }
-        }
-        @keyframes atomicJitter {
-            0% { transform: translate(0.5px, 0px) scale(0.99); }
-            50% { transform: translate(-0.5px, 0.5px) scale(1.01); }
-            100% { transform: translate(0px, -0.5px) scale(1); }
-        }
-        @keyframes blink { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
+        .jarvis-orb::before { content: ''; position: absolute; width: 160px; height: 160px; border-radius: 50%; border: 3px double #52b3d9; box-shadow: 0 0 15px rgba(82, 179, 217, 0.4); animation: rotateOrb 12s linear infinite; }
+        .jarvis-orb::after { content: ''; position: absolute; width: 100px; height: 100px; border-radius: 50%; border: 1px solid #00ffcc; box-shadow: inset 0 0 15px rgba(0, 255, 204, 0.2); animation: pulseCore 2.5s ease-in-out infinite; }
+        .jarvis-orb.listening { border-color: #00ffcc; box-shadow: 0 0 40px rgba(0, 255, 204, 0.5); }
+        .jarvis-orb.listening::before { border-color: #00ffcc; animation-duration: 4s; }
+        .jarvis-orb.speaking { border-color: #ff3366; box-shadow: 0 0 40px rgba(255, 51, 102, 0.5); }
+        .jarvis-orb.speaking::before { border-color: #ff3366; animation-duration: 2s; }
+        @keyframes rotateOrb { 100% { transform: rotate(360deg); } }
+        @keyframes pulseCore { 0%, 100% { transform: scale(0.95); opacity: 0.5; } 50% { transform: scale(1.05); opacity: 1; } }
+        .display-panel { width: 100%; max-height: 120px; background: rgba(5, 24, 38, 0.7); border: 1px solid rgba(82, 179, 217, 0.25); border-radius: 6px; padding: 12px; font-size: 13px; overflow-y: auto; text-align: center; margin-bottom: 12px; }
+        .user-text { color: #ffffff; margin-bottom: 4px; font-style: italic; }
+        .luna-text { color: #00ffcc; font-weight: bold; text-shadow: 0 0 4px rgba(0,255,204,0.3); }
+        .control-deck { width: 100%; display: flex; flex-direction: column; gap: 10px; align-items: center; z-index: 5; }
+        .text-input-container { display: flex; width: 100%; background: rgba(5, 24, 38, 0.8); border: 1px solid rgba(82, 179, 217, 0.4); border-radius: 4px; overflow: hidden; transition: all 0.3s ease; }
+        .text-input-container:focus-within { border-color: #00ffcc; box-shadow: 0 0 10px rgba(0, 255, 204, 0.2); }
+        .jarvis-input { flex: 1; background: transparent; border: none; outline: none; color: #ffffff; padding: 12px; font-family: inherit; font-size: 14px; }
+        .send-btn { background: rgba(82, 179, 217, 0.15); border: none; border-left: 1px solid rgba(82, 179, 217, 0.4); color: #52b3d9; padding: 0 16px; cursor: pointer; font-family: inherit; font-weight: bold; }
+        .voice-trigger-btn { background: transparent; border: 1px dashed #52b3d9; color: #52b3d9; padding: 12px; font-size: 12px; font-family: inherit; letter-spacing: 2px; text-transform: uppercase; border-radius: 4px; cursor: pointer; width: 100%; text-align: center; }
+        .history-drawer { position: absolute; top: 0; left: -100%; width: 90%; height: 100%; background: rgba(2, 10, 18, 0.98); border-right: 2px solid #52b3d9; box-shadow: 5px 0 25px rgba(82, 179, 217, 0.3); z-index: 10; transition: left 0.3s cubic-bezier(0.1, 0.9, 0.2, 1); padding: 20px; display: flex; flex-direction: column; backdrop-filter: blur(8px); }
+        .history-drawer.open { left: 0; }
+        .drawer-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #52b3d9; padding-bottom: 12px; margin-bottom: 15px; }
+        .drawer-title { font-weight: bold; letter-spacing: 1.5px; color: #52b3d9; text-shadow: 0 0 5px rgba(82,179,217,0.4); }
+        .close-drawer { color: #ff3366; font-weight: bold; cursor: pointer; font-size: 13px; }
+        .history-log-container { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 5px; }
+        .history-item { font-size: 12px; padding: 10px; border-radius: 4px; line-height: 1.5; border: 1px solid rgba(82, 179, 217, 0.15); }
+        .hist-user { background: rgba(255, 255, 255, 0.02); color: #ffffff; border-left: 3px solid #52b3d9; }
+        .hist-luna { background: rgba(0, 255, 204, 0.02); color: #00ffcc; border-left: 3px solid #00ffcc; text-shadow: 0 0 2px rgba(0,255,204,0.2); }
+        .wipe-btn { background: rgba(255, 51, 102, 0.05); border: 1px dashed #ff3366; color: #ff3366; padding: 12px; font-family: inherit; font-size: 11px; border-radius: 4px; cursor: pointer; margin-top: 15px; width: 100%; letter-spacing: 1px; }
     </style>
 </head>
 <body>
 
-    <div class="hud-header">
-        <div class="sys-title">LUNA MATRIX INTERIOR V6.0</div>
-        <div class="sys-status"><div class="pulse-dot"></div>REACTOR_STABLE</div>
-        <div class="history-trigger" id="openLogBtn">// DATALOG_STREAMS</div>
+    <div class="header">
+        <div>SYS: LUNA CORE V3.3</div>
+        <div class="history-toggle" id="openHistoryBtn">📝 CHAT LOGS</div>
     </div>
 
-    <div id="memoryDrawer" class="memory-drawer">
-        <div class="drawer-hud">
-            <span class="drawer-title">QUANTUM_DECK_CACHE.LOG</span>
-            <span class="drawer-close" id="closeLogBtn">[DISCONNECT]</span>
+    <div id="historyDrawer" class="history-drawer">
+        <div class="drawer-header">
+            <span class="drawer-title">CORE_MEMORY_LOGS.log</span>
+            <span class="close-drawer" id="closeHistoryBtn">[DISENGAGE]</span>
         </div>
-        <div id="logStream" class="log-stream"></div>
-        <button id="purgeCacheBtn" class="purge-btn">FLUSH STACK SEGMENTS</button>
+        <div id="historyLogContainer" class="history-log-container"></div>
+        <button id="wipeMemoryBtn" class="wipe-btn">WIPE SECURE ARCHIVE CACHE</button>
     </div>
 
-    <div class="hud-container">
-        <div class="nuclear-stage">
-            <div class="hud-bracket"></div>
-            
-            <div class="electron-orbit orbit-1"></div>
-            <div class="electron-orbit orbit-2"></div>
-            <div class="electron-orbit orbit-3"></div>
-            <div class="electron-orbit orbit-4"></div>
-            <div class="electron-orbit orbit-5"></div>
-            <div class="electron-orbit orbit-6"></div>
-            <div class="electron-orbit orbit-7"></div>
-            
-            <div id="lunaOrbCore" class="jarvis-orb">
-                <span id="orbLabel">STABLE</span>
-            </div>
+    <div class="orb-container">
+        <div id="jarvisOrb" class="jarvis-orb">
+            <span id="orbStateText" style="font-size: 10px; letter-spacing: 1px;">TAP TO TALK</span>
         </div>
     </div>
 
-    <div id="displayDeck" class="display-deck">
-        <div class="terminal-row luna-node">Luna: "Seven axis track synchronization complete. Orbital velocity stabilized at sub-harmonic speeds."</div>
+    <div id="displayPanel" class="display-panel">
+        <div class="luna-text">Vocal systems fully initialized. Systems clear, Ayush.</div>
     </div>
 
-    <div class="hud-footer">
-        <div class="input-bar-container">
-            <input type="text" id="matrixInput" class="matrix-input" placeholder="Inject localized system instruction array..." autocomplete="off">
-            <button id="sendBtn" class="matrix-send-btn">TRANSFUSE</button>
+    <div class="control-deck">
+        <div class="text-input-container">
+            <input type="text" id="keyboardInput" class="jarvis-input" placeholder="Transmit text directive..." autocomplete="off">
+            <button id="sendTextBtn" class="send-btn">SEND</button>
         </div>
-        <button id="micBtn" class="coupling-btn">LINK FIELD VOCAL CAPTURE</button>
+        <button id="voiceTalkBtn" class="voice-trigger-btn">ENGAGE MIC COUPLING</button>
     </div>
 
     <script>
         const RENDER_BACKEND_URL = "/v1/chat/completions";
-        const speechSynthesizer = window.speechSynthesis;
+        const synth = window.speechSynthesis;
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        let speechRecognizer = SpeechRecognition ? new SpeechRecognition() : null;
+        let recognition = SpeechRecognition ? new SpeechRecognition() : null;
         
-        if(speechRecognizer) { speechRecognizer.continuous = false; speechRecognizer.interimResults = false; speechRecognizer.lang = 'en-US'; }
+        if(recognition) { recognition.continuous = false; recognition.lang = 'en-US'; recognition.interimResults = false; }
 
-        const lunaOrbCore = document.getElementById('lunaOrbCore');
-        const orbLabel = document.getElementById('orbLabel');
-        const displayDeck = document.getElementById('displayDeck');
-        const micBtn = document.getElementById('micBtn');
-        const matrixInput = document.getElementById('matrixInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const memoryDrawer = document.getElementById('memoryDrawer');
-        const openLogBtn = document.getElementById('openLogBtn');
-        const logStream = document.getElementById('logStream');
-        const purgeCacheBtn = document.getElementById('purgeCacheBtn');
+        const jarvisOrb = document.getElementById('jarvisOrb');
+        const orbStateText = document.getElementById('orbStateText');
+        const displayPanel = document.getElementById('displayPanel');
+        const voiceTalkBtn = document.getElementById('voiceTalkBtn');
+        const keyboardInput = document.getElementById('keyboardInput');
+        const sendTextBtn = document.getElementById('sendTextBtn');
+        const historyDrawer = document.getElementById('historyDrawer');
+        const openHistoryBtn = document.getElementById('openHistoryBtn');
+        const historyLogContainer = document.getElementById('historyLogContainer');
+        const wipeMemoryBtn = document.getElementById('wipeMemoryBtn');
 
-        let interactionHistory = JSON.parse(localStorage.getItem('luna_v60_cache')) || [];
-        refreshLogPanel();
+        let chatHistory = JSON.parse(localStorage.getItem('luna_jarvis_history_v33')) || [];
+        renderLogsWindow();
 
-        openLogBtn.addEventListener('click', () => { refreshLogPanel(); memoryDrawer.classList.add('open'); });
-        document.getElementById('closeLogBtn').addEventListener('click', () => memoryDrawer.classList.remove('open'));
-        sendBtn.addEventListener('click', processTextTransmission);
-        matrixInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') processTextTransmission(); });
+        // Prime the engine cache
+        if (synth.onvoiceschanged !== undefined) { synth.onvoiceschanged = () => synth.getVoices(); }
 
-        async function processTextTransmission() {
-            const currentString = matrixInput.value.trim();
-            if(!currentString) return;
-            matrixInput.value = "";
-            displayDeck.innerHTML = `<div class="terminal-row user-node">Ayush: "${currentString}"</div>`;
-            interactionHistory.push({ role: "user", content: currentString });
-            commitCacheToMemory();
-            await broadcastToLunaMatrix(currentString);
+        openHistoryBtn.addEventListener('click', () => { renderLogsWindow(); historyDrawer.classList.add('open'); });
+        document.getElementById('closeHistoryBtn').addEventListener('click', () => historyDrawer.classList.remove('open'));
+        sendTextBtn.addEventListener('click', handleKeyboardTransmission);
+        keyboardInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleKeyboardTransmission(); });
+
+        async function handleKeyboardTransmission() {
+            const queryText = keyboardInput.value.trim();
+            if(!queryText) return;
+            keyboardInput.value = "";
+            displayPanel.innerHTML = `<div class="user-text">Ayush: "${queryText}"</div>`;
+            chatHistory.push({ role: "user", content: queryText });
+            saveLogsToPhone();
+            await connectWithLunaTextEngine(queryText);
         }
 
-        const triggerMicCoupling = () => { if (!speechRecognizer) { alert("Capture module link offline."); return; } speechSynthesizer.cancel(); speechRecognizer.start(); };
-        lunaOrbCore.addEventListener('click', triggerMicCoupling);
-        micBtn.addEventListener('click', triggerMicCoupling);
+        const igniteVoiceMechanism = () => { if (!recognition) { alert("Mic unavailable."); return; } synth.cancel(); recognition.start(); };
+        jarvisOrb.addEventListener('click', igniteVoiceMechanism);
+        voiceTalkBtn.addEventListener('click', igniteVoiceMechanism);
 
-        if(speechRecognizer) {
-            speechRecognizer.onstart = () => { lunaOrbCore.className = "jarvis-orb listening"; orbLabel.innerText = "CAPTURING"; };
-            speechRecognizer.onresult = async (event) => {
-                const speechResultText = event.results[0][0].transcript;
-                displayDeck.innerHTML = `<div class="terminal-row user-node">Ayush: "${speechResultText}"</div>`;
-                interactionHistory.push({ role: "user", content: speechResultText });
-                commitCacheToMemory();
-                await broadcastToLunaMatrix(speechResultText);
+        if(recognition) {
+            recognition.onstart = () => { jarvisOrb.className = "jarvis-orb listening"; orbStateText.innerText = "LISTENING"; };
+            recognition.onresult = async (event) => {
+                const transcriptResult = event.results[0][0].transcript;
+                displayPanel.innerHTML = `<div class="user-text">Ayush: "${transcriptResult}"</div>`;
+                chatHistory.push({ role: "user", content: transcriptResult });
+                saveLogsToPhone();
+                await connectWithLunaTextEngine(transcriptResult);
             };
-            speechRecognizer.onend = () => { if (!lunaOrbCore.classList.contains('speaking')) restoreOrbDefault(); };
+            recognition.onend = () => { if (!jarvisOrb.classList.contains('speaking')) resetOrbStyle(); };
         }
 
-        async function broadcastToLunaMatrix(textPayload) {
-            lunaOrbCore.className = "jarvis-orb thinking";
-            orbLabel.innerText = "COLLAPSING";
+        async function connectWithLunaTextEngine(textPayload) {
+            orbStateText.innerText = "THINKING";
             try {
-                const condensedContext = interactionHistory.slice(-20).map(msg => ({ role: msg.role, content: msg.content }));
-                const matrixResponse = await fetch(RENDER_BACKEND_URL, {
+                const runtimeContext = chatHistory.slice(-20).map(msg => ({ role: msg.role, content: msg.content }));
+                
+                const response = await fetch(RENDER_BACKEND_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ model: "luna-genesis-v5", messages: condensedContext, stream: false })
+                    body: JSON.stringify({ model: "luna-genesis-v1", messages: runtimeContext, stream: false })
                 });
 
-                const dataPackage = await matrixResponse.json();
-                const cleanReplyText = dataPackage.luna_text;
+                const dataPackage = await response.json();
+                const textReply = dataPackage.luna_text;
 
-                displayDeck.innerHTML = `<div class="terminal-row user-node">Ayush: "${textPayload}"</div><div class="terminal-row luna-node">Luna: "${cleanReplyText}"</div>`;
-                interactionHistory.push({ role: "assistant", content: cleanReplyText });
-                commitCacheToMemory();
+                displayPanel.innerHTML = `<div class="user-text">Ayush: "${textPayload}"</div><div class="luna-text">Luna: "${textReply}"</div>`;
+                chatHistory.push({ role: "assistant", content: textReply });
+                saveLogsToPhone();
 
-                projectVocalMatrix(cleanReplyText);
+                executeNeuralVoiceSpeaker(textReply);
+
             } catch (err) {
-                displayDeck.innerHTML += `<div style="color: #ff2a6d; font-size:11px;">[QUANTUM_DECOHERENCE_FAULT]</div>`;
-                restoreOrbDefault();
+                displayPanel.innerHTML += `<div style="color: #ff3366;">[Link Fault]: Core disconnected.</div>`;
+                resetOrbStyle();
             }
         }
 
-        function projectVocalMatrix(outputString) {
-            speechSynthesizer.cancel();
-            lunaOrbCore.className = "jarvis-orb speaking";
-            orbLabel.innerText = "EMITTING";
+        // 🎙️ HIGH-FIDELITY BROWSER VOICING PROJECTION MATRIX
+        function executeNeuralVoiceSpeaker(textToSpeak) {
+            synth.cancel(); // Stop overlap glitches
+            
+            jarvisOrb.className = "jarvis-orb speaking";
+            orbStateText.innerText = "SPEAKING";
 
-            const voiceWaveform = new SpeechSynthesisUtterance(outputString);
-            const structuralVoicePacks = speechSynthesizer.getVoices();
+            const vocalWaveform = new SpeechSynthesisUtterance(textToSpeak);
+            const availableVoices = synth.getVoices();
 
-            let matchingVoicePack = structuralVoicePacks.find(voice => 
-                voice.name.includes('Google hi-IN') || voice.lang.startsWith('hi-') ||
-                voice.name.includes('Google US English') || voice.name.includes('en-US-Neural2') || voice.name.includes('Samantha')
+            // Intelligent search algorithm prioritizing premium fluid assistant voice lines
+            let premiumVoice = availableVoices.find(voice => 
+                voice.name.includes('Google US English') || 
+                voice.name.includes('en-US-Neural2') || 
+                voice.name.includes('en-us-x-sfg-local') || 
+                voice.name.includes('Samantha') ||
+                voice.name.includes('Natural')
             );
 
-            if (!matchingVoicePack) { matchingVoicePack = structuralVoicePacks.find(voice => voice.lang.startsWith('en-')); }
-            if (matchingVoicePack) voiceWaveform.voice = matchingVoicePack;
+            if (!premiumVoice) {
+                premiumVoice = availableVoices.find(voice => voice.lang.startsWith('en-'));
+            }
 
-            voiceWaveform.rate = 1.02;
-            voiceWaveform.pitch = 1.0; 
-            voiceWaveform.onend = () => { restoreOrbDefault(); };
-            voiceWaveform.onerror = () => { restoreOrbDefault(); };
+            if (premiumVoice) vocalWaveform.voice = premiumVoice;
 
-            speechSynthesizer.speak(voiceWaveform);
+            vocalWaveform.rate = 1.05; // Perfect human response speed
+            vocalWaveform.pitch = 1.0; 
+
+            vocalWaveform.onend = () => { resetOrbStyle(); };
+            vocalWaveform.onerror = () => { resetOrbStyle(); };
+
+            synth.speak(vocalWaveform);
         }
 
-        function restoreOrbDefault() { lunaOrbCore.className = "jarvis-orb"; orbLabel.innerText = "STABLE"; }
-        function commitCacheToMemory() { localStorage.setItem('luna_v60_cache', JSON.stringify(interactionHistory)); }
-        function refreshLogPanel() 
+        function resetOrbStyle() { jarvisOrb.className = "jarvis-orb"; orbStateText.innerText = "TAP TO TALK"; }
+        function saveLogsToPhone() { localStorage.setItem('luna_jarvis_history_v33', JSON.stringify(chatHistory)); }
+        function renderLogsWindow() {
+            historyLogContainer.innerHTML = chatHistory.length === 0 
+                ? `<div style="color:rgba(82,179,217,0.4); text-align:center; padding-top:20px;">No logged data fragments.</div>`
+                : chatHistory.map(msg => {
+                    const label = msg.role === 'user' ? 'AYUSH' : 'LUNA';
+                    return `<div class="history-item ${msg.role === 'user' ? 'hist-user' : 'hist-luna'}"><strong>[${label}]:</strong> ${msg.content}</div>`;
+                  }).join('');
+            historyLogContainer.scrollTop = historyLogContainer.scrollHeight;
+        }
+
+        wipeMemoryBtn.addEventListener('click', () => {
+            if(confirm("Purge chat memory?")) { chatHistory = []; localStorage.removeItem('luna_jarvis_history_v33'); renderLogsWindow(); historyDrawer.classList.remove('open'); }
+        });
+    </script>
+</body>
+</html>
