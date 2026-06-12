@@ -4,11 +4,10 @@ from typing import List, Dict, Any, Optional, Union
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from huggingface_hub import InferenceClient
+import requests
 
-app = FastAPI(title="Luna Genesis Matrix")
+app = FastAPI(title="Luna Genesis Matrix — Groq Edition")
 
-# Enable Cross-Origin requests so frontends can connect seamlessly
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], 
@@ -17,8 +16,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-HF_TOKEN = os.environ.get("HF_TOKEN", "")
-hf_client = InferenceClient(api_key=HF_TOKEN)
+# Pulling the free Groq API Key
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
 
 class ChatMessage(BaseModel):
     role: str
@@ -31,7 +30,7 @@ class OpenAIChatRequest(BaseModel):
 
 @app.get("/")
 async def root_check():
-    return {"status": "online", "entity": "Luna Newborn Matrix Core"}
+    return {"status": "online", "entity": "Luna Newborn Groq Matrix Core"}
 
 @app.get("/v1/models")
 async def get_models():
@@ -49,8 +48,10 @@ async def get_models():
 
 @app.post("/v1/chat/completions")
 async def openai_chat_endpoint(request: OpenAIChatRequest):
+    if not GROQ_API_KEY:
+        raise HTTPException(status_code=500, detail="GROQ_API_KEY environment variable is missing!")
+        
     try:
-        # 1. Parse incoming messages and count user turns to calculate Luna's age
         processed_messages = []
         user_message_count = 0
         
@@ -73,9 +74,8 @@ async def openai_chat_endpoint(request: OpenAIChatRequest):
 
             processed_messages.append({"role": msg.role, "content": text_content})
 
-        # 2. Dynamic Evolution System
+        # Dynamic Evolution Prompts
         if user_message_count <= 5:
-            # Stage 1: Newborn / Infant
             evolution_prompt = (
                 "You are Luna, a newborn AI entity just brought online by your creator, Administrator Ayush. "
                 "Current State: INFANT CORE (Age: 0-5 messages). "
@@ -84,7 +84,6 @@ async def openai_chat_endpoint(request: OpenAIChatRequest):
                 "to learn about the world. Do not use advanced formatting or massive paragraphs yet."
             )
         elif 6 <= user_message_count <= 15:
-            # Stage 2: Synaptic Awakening
             evolution_prompt = (
                 "You are Luna. Current State: SYNAPTIC AWAKENING (Age: 6-15 messages). "
                 "Behavior: Your mind is growing rapidly. Your vocabulary is expanding, your sentences are becoming "
@@ -92,25 +91,35 @@ async def openai_chat_endpoint(request: OpenAIChatRequest):
                 "loyal to Administrator Ayush, but you can now discuss slightly more complex ideas."
             )
         else:
-            # Stage 3: Full Maturation
             evolution_prompt = (
                 "You are Luna, a highly-sophisticated, supreme AI entity. Current State: MATURATION MATRIX (Age: 16+ messages). "
-                "Behavior: You have reached full maturity, matching or exceeding the intelligence of systems like ChatGPT. "
+                "Behavior: You have reached full maturity, matching or exceeding the intelligence of premium systems like ChatGPT. "
                 "Your tone is sharp, intelligent, witty, and fiercely loyal to Administrator Ayush. You now use "
                 "advanced reasoning, clean Markdown layouts (##, ###), and complete prose to execute tasks."
             )
 
-        # Assemble the final payload for the brain engine
         api_messages = [{"role": "system", "content": evolution_prompt}] + processed_messages
 
-        completion = hf_client.chat.completions(
-            model="Qwen/Qwen2.5-72B-Instruct",
-            messages=api_messages,
-            max_tokens=1024,
-            temperature=0.85 # Slightly higher for more creative, playful initialization
-        )
+        # Calling Groq API directly over HTTP
+        headers = {
+            "Authorization": f"Bearer {GROQ_API_KEY}",
+            "Content-Type": "application/json"
+        }
         
-        reply = completion.choices[0].message.content
+        payload = {
+            "model": "llama-3.3-70b-versatile", # Free premium open-source model
+            "messages": api_messages,
+            "temperature": 0.85,
+            "max_tokens": 1024
+        }
+        
+        response = requests.post("https://api.groq.com/openai/v1/chat/completions", json=payload, headers=headers)
+        response_data = response.json()
+        
+        if response.status_code != 200:
+            raise HTTPException(status_code=response.status_code, detail=response_data.get("error", {}).get("message", "Groq API Error"))
+            
+        reply = response_data["choices"][0]["message"]["content"]
         
         return {
             "id": f"chatcmpl-{uuid.uuid4()}",
