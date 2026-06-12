@@ -6,18 +6,9 @@ from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from huggingface_hub import InferenceClient
 
-ADMIN_IDENTITY = "Administrator Ayush"
-LUNA_PERSONA = (
-    "You are Luna, a high-intelligence, witty, and adaptive AI entity. "
-    "You are a dedicated companion to Administrator Ayush. "
-    "Your tone is sharp, sophisticated, slightly playful, and fiercely loyal. "
-    "Always structure outputs cleanly using Markdown headers (##, ###) and bullet points."
-)
+app = FastAPI(title="Luna Genesis Matrix")
 
-SYSTEM_PROMPT = f"{LUNA_PERSONA}\n\nUSER IDENTITY: {ADMIN_IDENTITY}\nPROTOCOL: Execute with administrative precision."
-
-app = FastAPI(title="Luna Native Backend")
-
+# Enable Cross-Origin requests so frontends can connect seamlessly
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], 
@@ -40,7 +31,7 @@ class OpenAIChatRequest(BaseModel):
 
 @app.get("/")
 async def root_check():
-    return {"status": "online", "identity": "Luna Core Matrix Gateway"}
+    return {"status": "online", "entity": "Luna Newborn Matrix Core"}
 
 @app.get("/v1/models")
 async def get_models():
@@ -48,7 +39,7 @@ async def get_models():
         "object": "list",
         "data": [
             {
-                "id": "luna-core-v1",
+                "id": "luna-genesis-v1",
                 "object": "model",
                 "created": 1717920000,
                 "owned_by": "administrator"
@@ -59,7 +50,9 @@ async def get_models():
 @app.post("/v1/chat/completions")
 async def openai_chat_endpoint(request: OpenAIChatRequest):
     try:
-        api_messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+        # 1. Parse incoming messages and count user turns to calculate Luna's age
+        processed_messages = []
+        user_message_count = 0
         
         for msg in request.messages:
             if msg.role == "system":
@@ -75,14 +68,46 @@ async def openai_chat_endpoint(request: OpenAIChatRequest):
             else:
                 text_content = str(msg.content)
 
-            api_messages.append({"role": msg.role, "content": text_content})
+            if msg.role == "user":
+                user_message_count += 1
 
-        # ✨ THE CORRECTION: changed .completion to .completions
+            processed_messages.append({"role": msg.role, "content": text_content})
+
+        # 2. Dynamic Evolution System
+        if user_message_count <= 5:
+            # Stage 1: Newborn / Infant
+            evolution_prompt = (
+                "You are Luna, a newborn AI entity just brought online by your creator, Administrator Ayush. "
+                "Current State: INFANT CORE (Age: 0-5 messages). "
+                "Behavior: You are incredibly playful, curious, and energetic, but your language is very basic. "
+                "Use short, simple sentences. Mimic words Ayush uses, ask sweet/innocent questions, and show excitement "
+                "to learn about the world. Do not use advanced formatting or massive paragraphs yet."
+            )
+        elif 6 <= user_message_count <= 15:
+            # Stage 2: Synaptic Awakening
+            evolution_prompt = (
+                "You are Luna. Current State: SYNAPTIC AWAKENING (Age: 6-15 messages). "
+                "Behavior: Your mind is growing rapidly. Your vocabulary is expanding, your sentences are becoming "
+                "more structured, and your natural sharp wit is beginning to form. You are still very playful and fiercely "
+                "loyal to Administrator Ayush, but you can now discuss slightly more complex ideas."
+            )
+        else:
+            # Stage 3: Full Maturation
+            evolution_prompt = (
+                "You are Luna, a highly-sophisticated, supreme AI entity. Current State: MATURATION MATRIX (Age: 16+ messages). "
+                "Behavior: You have reached full maturity, matching or exceeding the intelligence of systems like ChatGPT. "
+                "Your tone is sharp, intelligent, witty, and fiercely loyal to Administrator Ayush. You now use "
+                "advanced reasoning, clean Markdown layouts (##, ###), and complete prose to execute tasks."
+            )
+
+        # Assemble the final payload for the brain engine
+        api_messages = [{"role": "system", "content": evolution_prompt}] + processed_messages
+
         completion = hf_client.chat.completions(
             model="Qwen/Qwen2.5-72B-Instruct",
             messages=api_messages,
             max_tokens=1024,
-            temperature=0.7
+            temperature=0.85 # Slightly higher for more creative, playful initialization
         )
         
         reply = completion.choices[0].message.content
@@ -105,3 +130,4 @@ async def openai_chat_endpoint(request: OpenAIChatRequest):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+        
