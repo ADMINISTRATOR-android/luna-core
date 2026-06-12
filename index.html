@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LUNA — JARVIS CORE V3.1</title>
+    <title>LUNA — JARVIS CORE V3.2</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -52,7 +52,7 @@
 <body>
 
     <div class="header">
-        <div>SYS: LUNA MATRIX V3.1</div>
+        <div>SYS: LUNA CORE V3.2</div>
         <div class="history-toggle" id="openHistoryBtn">📝 CHAT LOGS</div>
     </div>
 
@@ -72,7 +72,7 @@
     </div>
 
     <div id="displayPanel" class="display-panel">
-        <div class="luna-text">Neural Voice Engine Calibrated. Standing by, Ayush.</div>
+        <div class="luna-text">Neural Matrix online. Awaiting directive parameters, Ayush.</div>
     </div>
 
     <div class="control-deck">
@@ -101,7 +101,7 @@
         const historyLogContainer = document.getElementById('historyLogContainer');
         const wipeMemoryBtn = document.getElementById('wipeMemoryBtn');
 
-        let chatHistory = JSON.parse(localStorage.getItem('luna_jarvis_history_v31')) || [];
+        let chatHistory = JSON.parse(localStorage.getItem('luna_jarvis_history_v32')) || [];
         renderLogsWindow();
 
         openHistoryBtn.addEventListener('click', () => { renderLogsWindow(); historyDrawer.classList.add('open'); });
@@ -135,7 +135,6 @@
             recognition.onend = () => { if (!jarvisOrb.classList.contains('speaking')) resetOrbStyle(); };
         }
 
-        // ⚡ ASYNC ROCK-SOLID JSON PROCESSOR
         async function connectWithLunaNeuralMatrix(textPayload) {
             orbStateText.innerText = "THINKING";
             try {
@@ -148,16 +147,20 @@
                 });
 
                 const dataPackage = await response.json();
-                const textReply = dataPackage.luna_text;
-                const base64Audio = dataPackage.audio_base64;
+                
+                // Grab precise mapped elements to completely avoid "undefined" strings
+                const textReply = dataPackage.luna_text || "Transmission error encountered.";
+                const base64Audio = dataPackage.audio_base64 || "";
 
-                // Print response text instantly
                 displayPanel.innerHTML = `<div class="user-text">Ayush: "${textPayload}"</div><div class="luna-text">Luna: "${textReply}"</div>`;
                 chatHistory.push({ role: "assistant", content: textReply });
                 saveLogsToPhone();
 
-                // Fire vocal projection processing
-                executeNeuralVocalPlayback(base64Audio);
+                if (base64Audio) {
+                    executeNeuralVocalPlayback(base64Audio);
+                } else {
+                    resetOrbStyle();
+                }
 
             } catch (err) {
                 displayPanel.innerHTML += `<div style="color: #ff3366;">[Link Fault]: Data transmission dropped.</div>`;
@@ -165,21 +168,20 @@
             }
         }
 
-        // Decode Base64 string directly into the audio pipeline
         function executeNeuralVocalPlayback(base64String) {
             jarvisOrb.className = "jarvis-orb speaking";
             orbStateText.innerText = "SPEAKING";
 
-            // Convert string block straight back into audio playable formats
             const audioPlayableUrl = "data:audio/mpeg;base64," + base64String;
             const nativeAudioPlayer = new Audio(audioPlayableUrl);
             
             nativeAudioPlayer.onended = () => { resetOrbStyle(); };
+            nativeAudioPlayer.onerror = () => { resetOrbStyle(); };
             nativeAudioPlayer.play().catch(() => { resetOrbStyle(); });
         }
 
         function resetOrbStyle() { jarvisOrb.className = "jarvis-orb"; orbStateText.innerText = "TAP TO TALK"; }
-        function saveLogsToPhone() { localStorage.setItem('luna_jarvis_history_v31', JSON.stringify(chatHistory)); }
+        function saveLogsToPhone() { localStorage.setItem('luna_jarvis_history_v32', JSON.stringify(chatHistory)); }
         function renderLogsWindow() {
             historyLogContainer.innerHTML = chatHistory.length === 0 
                 ? `<div style="color:rgba(82,179,217,0.4); text-align:center; padding-top:20px;">No logged data fragments.</div>`
@@ -191,7 +193,7 @@
         }
 
         wipeMemoryBtn.addEventListener('click', () => {
-            if(confirm("Purge chat memory?")) { chatHistory = []; localStorage.removeItem('luna_jarvis_history_v31'); renderLogsWindow(); historyDrawer.classList.remove('open'); }
+            if(confirm("Purge chat memory?")) { chatHistory = []; localStorage.removeItem('luna_jarvis_history_v32'); renderLogsWindow(); historyDrawer.classList.remove('open'); }
         });
     </script>
 </body>
