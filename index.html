@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LUNA — JARVIS CORE V3.2</title>
+    <title>LUNA — JARVIS CORE V3.3</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -52,7 +52,7 @@
 <body>
 
     <div class="header">
-        <div>SYS: LUNA CORE V3.2</div>
+        <div>SYS: LUNA CORE V3.3</div>
         <div class="history-toggle" id="openHistoryBtn">📝 CHAT LOGS</div>
     </div>
 
@@ -72,7 +72,7 @@
     </div>
 
     <div id="displayPanel" class="display-panel">
-        <div class="luna-text">Neural Matrix online. Awaiting directive parameters, Ayush.</div>
+        <div class="luna-text">Vocal systems fully initialized. Systems clear, Ayush.</div>
     </div>
 
     <div class="control-deck">
@@ -85,6 +85,7 @@
 
     <script>
         const RENDER_BACKEND_URL = "/v1/chat/completions";
+        const synth = window.speechSynthesis;
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition = SpeechRecognition ? new SpeechRecognition() : null;
         
@@ -101,8 +102,11 @@
         const historyLogContainer = document.getElementById('historyLogContainer');
         const wipeMemoryBtn = document.getElementById('wipeMemoryBtn');
 
-        let chatHistory = JSON.parse(localStorage.getItem('luna_jarvis_history_v32')) || [];
+        let chatHistory = JSON.parse(localStorage.getItem('luna_jarvis_history_v33')) || [];
         renderLogsWindow();
+
+        // Prime the engine cache
+        if (synth.onvoiceschanged !== undefined) { synth.onvoiceschanged = () => synth.getVoices(); }
 
         openHistoryBtn.addEventListener('click', () => { renderLogsWindow(); historyDrawer.classList.add('open'); });
         document.getElementById('closeHistoryBtn').addEventListener('click', () => historyDrawer.classList.remove('open'));
@@ -116,10 +120,10 @@
             displayPanel.innerHTML = `<div class="user-text">Ayush: "${queryText}"</div>`;
             chatHistory.push({ role: "user", content: queryText });
             saveLogsToPhone();
-            await connectWithLunaNeuralMatrix(queryText);
+            await connectWithLunaTextEngine(queryText);
         }
 
-        const igniteVoiceMechanism = () => { if (!recognition) { alert("Mic unavailable."); return; } recognition.start(); };
+        const igniteVoiceMechanism = () => { if (!recognition) { alert("Mic unavailable."); return; } synth.cancel(); recognition.start(); };
         jarvisOrb.addEventListener('click', igniteVoiceMechanism);
         voiceTalkBtn.addEventListener('click', igniteVoiceMechanism);
 
@@ -130,12 +134,12 @@
                 displayPanel.innerHTML = `<div class="user-text">Ayush: "${transcriptResult}"</div>`;
                 chatHistory.push({ role: "user", content: transcriptResult });
                 saveLogsToPhone();
-                await connectWithLunaNeuralMatrix(transcriptResult);
+                await connectWithLunaTextEngine(transcriptResult);
             };
             recognition.onend = () => { if (!jarvisOrb.classList.contains('speaking')) resetOrbStyle(); };
         }
 
-        async function connectWithLunaNeuralMatrix(textPayload) {
+        async function connectWithLunaTextEngine(textPayload) {
             orbStateText.innerText = "THINKING";
             try {
                 const runtimeContext = chatHistory.slice(-20).map(msg => ({ role: msg.role, content: msg.content }));
@@ -147,41 +151,56 @@
                 });
 
                 const dataPackage = await response.json();
-                
-                // Grab precise mapped elements to completely avoid "undefined" strings
-                const textReply = dataPackage.luna_text || "Transmission error encountered.";
-                const base64Audio = dataPackage.audio_base64 || "";
+                const textReply = dataPackage.luna_text;
 
                 displayPanel.innerHTML = `<div class="user-text">Ayush: "${textPayload}"</div><div class="luna-text">Luna: "${textReply}"</div>`;
                 chatHistory.push({ role: "assistant", content: textReply });
                 saveLogsToPhone();
 
-                if (base64Audio) {
-                    executeNeuralVocalPlayback(base64Audio);
-                } else {
-                    resetOrbStyle();
-                }
+                executeNeuralVoiceSpeaker(textReply);
 
             } catch (err) {
-                displayPanel.innerHTML += `<div style="color: #ff3366;">[Link Fault]: Data transmission dropped.</div>`;
+                displayPanel.innerHTML += `<div style="color: #ff3366;">[Link Fault]: Core disconnected.</div>`;
                 resetOrbStyle();
             }
         }
 
-        function executeNeuralVocalPlayback(base64String) {
+        // 🎙️ HIGH-FIDELITY BROWSER VOICING PROJECTION MATRIX
+        function executeNeuralVoiceSpeaker(textToSpeak) {
+            synth.cancel(); // Stop overlap glitches
+            
             jarvisOrb.className = "jarvis-orb speaking";
             orbStateText.innerText = "SPEAKING";
 
-            const audioPlayableUrl = "data:audio/mpeg;base64," + base64String;
-            const nativeAudioPlayer = new Audio(audioPlayableUrl);
-            
-            nativeAudioPlayer.onended = () => { resetOrbStyle(); };
-            nativeAudioPlayer.onerror = () => { resetOrbStyle(); };
-            nativeAudioPlayer.play().catch(() => { resetOrbStyle(); });
+            const vocalWaveform = new SpeechSynthesisUtterance(textToSpeak);
+            const availableVoices = synth.getVoices();
+
+            // Intelligent search algorithm prioritizing premium fluid assistant voice lines
+            let premiumVoice = availableVoices.find(voice => 
+                voice.name.includes('Google US English') || 
+                voice.name.includes('en-US-Neural2') || 
+                voice.name.includes('en-us-x-sfg-local') || 
+                voice.name.includes('Samantha') ||
+                voice.name.includes('Natural')
+            );
+
+            if (!premiumVoice) {
+                premiumVoice = availableVoices.find(voice => voice.lang.startsWith('en-'));
+            }
+
+            if (premiumVoice) vocalWaveform.voice = premiumVoice;
+
+            vocalWaveform.rate = 1.05; // Perfect human response speed
+            vocalWaveform.pitch = 1.0; 
+
+            vocalWaveform.onend = () => { resetOrbStyle(); };
+            vocalWaveform.onerror = () => { resetOrbStyle(); };
+
+            synth.speak(vocalWaveform);
         }
 
         function resetOrbStyle() { jarvisOrb.className = "jarvis-orb"; orbStateText.innerText = "TAP TO TALK"; }
-        function saveLogsToPhone() { localStorage.setItem('luna_jarvis_history_v32', JSON.stringify(chatHistory)); }
+        function saveLogsToPhone() { localStorage.setItem('luna_jarvis_history_v33', JSON.stringify(chatHistory)); }
         function renderLogsWindow() {
             historyLogContainer.innerHTML = chatHistory.length === 0 
                 ? `<div style="color:rgba(82,179,217,0.4); text-align:center; padding-top:20px;">No logged data fragments.</div>`
@@ -193,7 +212,7 @@
         }
 
         wipeMemoryBtn.addEventListener('click', () => {
-            if(confirm("Purge chat memory?")) { chatHistory = []; localStorage.removeItem('luna_jarvis_history_v32'); renderLogsWindow(); historyDrawer.classList.remove('open'); }
+            if(confirm("Purge chat memory?")) { chatHistory = []; localStorage.removeItem('luna_jarvis_history_v33'); renderLogsWindow(); historyDrawer.classList.remove('open'); }
         });
     </script>
 </body>
