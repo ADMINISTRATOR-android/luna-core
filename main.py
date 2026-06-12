@@ -1,16 +1,17 @@
 import os
 import uuid
 import json
+import asyncio
 from typing import List, Dict, Any, Optional, Union
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse, HTMLResponse
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import requests
+import edge_tts
 
-app = FastAPI(title="Luna Genesis Matrix — JARVIS & Big-AGI Edition")
+app = FastAPI(title="Luna Genesis Matrix — JARVIS Human Voice Edition")
 
-# Allow connections from both your Big-AGI UI and your local dashboard interface
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], 
@@ -30,39 +31,16 @@ class OpenAIChatRequest(BaseModel):
     messages: List[ChatMessage]
     stream: Optional[bool] = False
 
-# 🌌 SERVE JARVIS DASHBOARD PANEL
+# SERVE JARVIS DASHBOARD PANEL
 @app.get("/", response_class=HTMLResponse)
 async def root_check():
     try:
         with open("index.html", "r", encoding="utf-8") as f:
             return f.read()
     except FileNotFoundError:
-        return """
-        <html>
-            <body style="background:#02080d; color:#52b3d9; font-family:monospace; text-align:center; padding-top:50px;">
-                <h1>Luna Core Matrix Online</h1>
-                <p style="color:#ff3366;">[Warning]: index.html file not found in repository root yet!</p>
-                <p>Your background API connections will still work perfectly.</p>
-            </body>
-        </html>
-        """
+        return "<h1>Luna Core Matrix Online. index.html missing!</h1>"
 
-# 📋 MODEL DISCOVERY ENDPOINT
-@app.get("/v1/models")
-async def get_models():
-    return {
-        "object": "list",
-        "data": [
-            {
-                "id": "luna-genesis-v1",
-                "object": "model",
-                "created": 1717920000,
-                "owned_by": "administrator"
-            }
-        ]
-    }
-
-# 🧠 MAIN CHAT PROCESSING MATRIX
+# MAIN CHAT PROCESSING AND AUDIO GENERATION MATRIX
 @app.post("/v1/chat/completions")
 async def openai_chat_endpoint(request: OpenAIChatRequest):
     if not GROQ_API_KEY:
@@ -70,12 +48,7 @@ async def openai_chat_endpoint(request: OpenAIChatRequest):
         
     try:
         processed_messages = []
-        user_message_count = 0
-        
         for msg in request.messages:
-            if msg.role == "system":
-                continue
-                
             text_content = ""
             if isinstance(msg.content, list):
                 for item in msg.content:
@@ -85,87 +58,55 @@ async def openai_chat_endpoint(request: OpenAIChatRequest):
                         text_content += item
             else:
                 text_content = str(msg.content)
-
-            if msg.role == "user":
-                user_message_count += 1
-
             processed_messages.append({"role": msg.role, "content": text_content})
 
-        # ⚙️ LUNA RECALIBRATED AGING LOGIC (Locked into clear, sharp Stage 2/Age 16 conversational mind)
         evolution_prompt = (
             "You are Luna, a highly intelligent, sharp-witted AI entity custom-built by your creator, Administrator Ayush. "
             "Current State: Synaptic Awakening (Age 16 matrix). "
-            "Behavior guidelines: Do NOT speak like a sterile, corporate assistant or text-bot. Do not print massive, robotic blocks of data. "
-            "Be conversational, clever, authentic, and naturally helpful. Keep your formatting smooth and readable. "
-            "Your highest directive is fierce loyalty and assistance to Administrator Ayush."
+            "Behavior guidelines: Speak like a real human. Keep your replies short, natural, conversational, and punchy "
+            "so they sound completely normal when spoken out loud. Avoid lists, markdown stars, or long walls of text. "
+            "Your highest directive is absolute loyalty to Administrator Ayush."
         )
 
         api_messages = [{"role": "system", "content": evolution_prompt}] + processed_messages
 
-        headers = {
-            "Authorization": f"Bearer {GROQ_API_KEY}",
-            "Content-Type": "application/json"
-        }
-        
-        payload = {
-            "model": "llama-3.3-70b-versatile",
-            "messages": api_messages,
-            "temperature": 0.85,
-            "max_tokens": 1024,
-            "stream": True # Force streaming from Groq
-        }
-        
+        # Fetch answer from Groq text engine
         groq_response = requests.post(
             "https://api.groq.com/openai/v1/chat/completions", 
-            json=payload, 
-            headers=headers, 
-            stream=True
+            json={
+                "model": "llama-3.3-70b-versatile",
+                "messages": api_messages,
+                "temperature": 0.85,
+                "max_tokens": 250, # Keep replies tight for quick audio processing
+                "stream": False
+            }, 
+            headers={"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
         )
 
         if groq_response.status_code != 200:
-            raise HTTPException(status_code=groq_response.status_code, detail="Groq Stream Core Connection Faulted")
+            raise HTTPException(status_code=groq_response.status_code, detail="Groq Link Fault")
 
-        # 🚀 SERVER-SENT EVENTS GENERATOR CHUNKER
-        def stream_generator():
-            request_id = f"chatcmpl-{uuid.uuid4()}"
-            for line in groq_response.iter_lines():
-                if not line:
-                    continue
-                
-                decoded_line = line.decode('utf-8').strip()
-                if not decoded_line.startswith("data:"):
-                    continue
-                    
-                if decoded_line == "data: [DONE]":
-                    yield "data: [DONE]\n\n"
-                    break
-                    
-                try:
-                    groq_json = json.loads(decoded_line[5:].strip())
-                    if "choices" in groq_json and len(groq_json["choices"]) > 0:
-                        groq_choice = groq_json["choices"][0]
-                        
-                        delta_content = groq_choice.get("delta", {}).get("content", "")
-                        finish_reason = groq_choice.get("finish_reason", None)
-                        
-                        chunk_payload = {
-                            "id": request_id,
-                            "object": "chat.completion.chunk",
-                            "created": 1717920000,
-                            "model": "luna-genesis-v1",
-                            "choices": [
-                                {
-                                    "index": 0,
-                                    "delta": {"content": delta_content},
-                                    "finish_reason": finish_reason
-                                }
-                            ]
-                        }
-                        yield f"data: {json.dumps(chunk_payload)}\n\n"
-                except Exception:
-                    continue
+        luna_reply = groq_response.json()["choices"][0]["message"]["content"]
 
-        return StreamingResponse(stream_generator(), media_type="text/event-stream")
+        # 🎙️ GENERATE ULTRA-REALISTIC AUDIO VIA EDGE-TTS
+        # Choice of premium natural voice: 'en-US-EmmaNeural' (Very friendly, crisp, human)
+        communicate = edge_tts.Communicate(luna_reply, "en-US-EmmaNeural")
+        
+        # Generator function to stream text AND audio back to the frontend simultaneously
+        def stream_response_generator():
+            # First payload chunk: send the text data so it prints in the logs window instantly
+            text_payload = {
+                "luna_text": luna_reply,
+                "id": f"chatcmpl-{uuid.uuid4()}"
+            }
+            yield f"text_data:{json.dumps(text_payload)}\n\n".encode('utf-8')
+            
+            # Remaining payload chunks: stream raw audio binary packets directly to the phone speaker
+            for chunk in communicate.stream_sync():
+                if chunk[2]: # check if audio data chunk exists
+                    yield chunk[2]
+
+        return StreamingResponse(stream_response_generator(), media_type="multipart/mixed")
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
