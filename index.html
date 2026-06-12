@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LUNA — JARVIS CORE</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background-color: #02080d;
+            color: #52b3d9;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            height: 100vh;
+            overflow: hidden;
+            padding: 20px;
+        }
+        /* Top Header Stats */
+        .header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            letter-spacing: 2px;
+            border-bottom: 1px solid rgba(82, 179, 217, 0.2);
+            padding-bottom: 8px;
+        }
+        .status-online { color: #00ffcc; text-shadow: 0 0 8px #00ffcc; }
+
+        /* Holographic JARVIS Orb Container */
+        .orb-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            width: 100%;
+        }
+        .jarvis-orb {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(2,15,26,1) 0%, rgba(5,42,69,0.4) 60%, rgba(82,179,217,0.1) 100%);
+            border: 2px dashed rgba(82, 179, 217, 0.4);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 30px rgba(82, 179, 217, 0.2);
+            transition: all 0.3s ease;
+        }
+        .jarvis-orb::before {
+            content: '';
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            border: 4px double #52b3d9;
+            box-shadow: 0 0 20px rgba(82, 179, 217, 0.5);
+            animation: rotateOrb 10s linear infinite;
+        }
+        .jarvis-orb::after {
+            content: '';
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 1px solid #00ffcc;
+            box-shadow: inset 0 0 15px rgba(0, 255, 204, 0.3);
+            animation: pulseCore 2s ease-in-out infinite;
+        }
+        
+        /* Interactive States for Orb */
+        .jarvis-orb.listening {
+            border-color: #00ffcc;
+            box-shadow: 0 0 50px rgba(0, 255, 204, 0.6);
+        }
+        .jarvis-orb.listening::before { border-color: #00ffcc; animation-duration: 3s; }
+
+        .jarvis-orb.speaking {
+            border-color: #ff3366;
+            box-shadow: 0 0 50px rgba(ff, 51, 102, 0.6);
+        }
+        .jarvis-orb.speaking::before { border-color: #ff3366; animation-duration: 1.5s; }
+
+        @keyframes rotateOrb { 100% { transform: rotate(360deg); } }
+        @keyframes pulseCore { 0%, 100% { transform: scale(0.95); opacity: 0.6; } 50% { transform: scale(1.05); opacity: 1; } }
+
+        /* Live Terminal Output Block */
+        .display-panel {
+            width: 100%;
+            max-height: 150px;
+            background: rgba(5, 24, 38, 0.6);
+            border: 1px solid rgba(82, 179, 217, 0.3);
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 14px;
+            overflow-y: auto;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .user-text { color: #ffffff; margin-bottom: 6px; font-style: italic; }
+        .luna-text { color: #00ffcc; font-weight: bold; }
+
+        /* Control Tray */
+        .controls {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+        }
+        .action-btn {
+            background: transparent;
+            border: 1px solid #52b3d9;
+            color: #52b3d9;
+            padding: 14px 28px;
+            font-size: 14px;
+            font-family: inherit;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 80%;
+            box-shadow: 0 0 10px rgba(82, 179, 217, 0.2);
+            transition: all 0.2s ease;
+        }
+        .action-btn:active {
+            background: rgba(82, 179, 217, 0.2);
+            box-shadow: 0 0 20px #52b3d9;
+        }
+        .history-btn {
+            background: transparent;
+            border: none;
+            color: rgba(82, 179, 217, 0.6);
+            font-size: 11px;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div>SYS: LUNA V1.0</div>
+        <div>MATRIX: <span class="status-online">CONNECTED</span></div>
+    </div>
+
+    <div class="orb-container">
+        <div id="jarvisOrb" class="jarvis-orb">
+            <span id="orbStateText" style="font-size: 10px; letter-spacing: 1px;">TAP TO TALK</span>
+        </div>
+    </div>
+
+    <div id="displayPanel" class="display-panel">
+        <div class="luna-text">System initialization complete. Standing by for instructions, Administrator Ayush.</div>
+    </div>
+
+    <div class="controls">
+        <button id="talkBtn" class="action-btn">INITIALIZE VOICE COUPLING</button>
+        <button id="clearBtn" class="history-btn">Wipe Memory Records</button>
+    </div>
+
+    <script>
+        // Setup backend variable configuration
+        const RENDER_BACKEND_URL = "https://luna-backend-xknx.onrender.com/v1/chat/completions";
+        
+        // Internal Voice Engine Definitions
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const synth = window.speechSynthesis;
+        let recognition = SpeechRecognition ? new SpeechRecognition() : null;
+        
+        if(recognition) {
+            recognition.continuous = false;
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+        }
+
+        // Element Handles
+        const jarvisOrb = document.getElementById('jarvisOrb');
+        const orbStateText = document.getElementById('orbStateText');
+        const displayPanel = document.getElementById('displayPanel');
+        const talkBtn = document.getElementById('talkBtn');
+        const clearBtn = document.getElementById('clearBtn');
+
+        // Load 15+ Days Memory Records from Phone Storage
+        let chatHistory = JSON.parse(localStorage.getItem('luna_jarvis_history')) || [];
+
+        // 🎙️ Voice Listening Ignition
+        talkBtn.addEventListener('click', () => {
+            if (!recognition) {
+                alert("Voice synthesis parsing not fully native on this web package browser view.");
+                return;
+            }
+            synth.cancel(); // Mute ongoing loops
+            recognition.start();
+        });
+
+        if(recognition) {
+            recognition.onstart = () => {
+                jarvisOrb.className = "jarvis-orb listening";
+                orbStateText.innerText = "LISTENING...";
+                talkBtn.innerText = "LISTENING INTERFACE ENGAGED";
+            };
+
+            recognition.onresult = async (event) => {
+                const userSpeech = event.results[0][0].transcript;
+                displayPanel.innerHTML = `<div class="user-text">Ayush: "${userSpeech}"</div>`;
+                
+                // Add to history array
+                chatHistory.push({ role: "user", content: userSpeech });
+                saveHistory();
+
+                // Call Render Server
+                await queryLunaMatrix(userSpeech);
+            };
+
+            recognition.onend = () => {
+                if (!jarvisOrb.classList.contains('speaking')) {
+                    resetOrbStyle();
+                }
+            };
+        }
+
+        // 🧠 Communication Link to Render Server
+        async function queryLunaMatrix(textInput) {
+            orbStateText.innerText = "THINKING...";
+            try {
+                // Build complete request array using past logs for persistent memory tracing
+                const payloadMessages = chatHistory.slice(-20).map(msg => ({
+                    role: msg.role,
+                    content: msg.content
+                }));
+
+                const response = await fetch(RENDER_BACKEND_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: "luna-genesis-v1",
+                        messages: payloadMessages,
+                        stream: false
+                    })
+                });
+
+                const rawData = await response.json();
+                const lunaReply = rawData.choices[0].message.content;
+
+                // Log response text permanently
+                chatHistory.push({ role: "assistant", content: lunaReply });
+                saveHistory();
+
+                // Present and Speak
+                displayPanel.innerHTML += `<div class="luna-text">Luna: "${lunaReply}"</div>`;
+                displayPanel.scrollTop = displayPanel.scrollHeight;
+                speakOutLoud(lunaReply);
+
+            } catch (err) {
+                displayPanel.innerHTML += `<div style="color: #ff3366;">[Link Fault]: Core sync timed out.</div>`;
+                resetOrbStyle();
+            }
+        }
+
+        // 🔊 Vocal Core System Engine
+        function speakOutLoud(text) {
+            jarvisOrb.className = "jarvis-orb speaking";
+            orbStateText.innerText = "SPEAKING";
+            talkBtn.innerText = "LUNA TRANSMITTING OUTPUT";
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            // Adjust to get a nice high-tech smart tone
+            utterance.rate = 1.05; 
+            utterance.pitch = 1.1;
+
+            utterance.onend = () => { resetOrbStyle(); };
+            synth.speak(utterance);
+        }
+
+        function resetOrbStyle() {
+            jarvisOrb.className = "jarvis-orb";
+            orbStateText.innerText = "TAP TO TALK";
+            talkBtn.innerText = "INITIALIZE VOICE COUPLING";
+        }
+
+        function saveHistory() {
+            localStorage.setItem('luna_jarvis_history', JSON.stringify(chatHistory));
+        }
+
+        clearBtn.addEventListener('click', () => {
+            chatHistory = [];
+            localStorage.removeItem('luna_jarvis_history');
+            displayPanel.innerHTML = `<div class="luna-text">Memory matrix purged. Data tracking set back to 0.</div>`;
+        });
+    </script>
+</body>
+</html>
+
