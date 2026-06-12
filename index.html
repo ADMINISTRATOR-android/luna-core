@@ -1,9 +1,9 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LUNA — JARVIS CORE V2</title>
+    <title>LUNA — JARVIS CORE V2.5</title>
     <style>
         * {
             box-sizing: border-box;
@@ -36,7 +36,7 @@
             z-index: 5;
         }
         .status-online { color: #00ffcc; text-shadow: 0 0 8px #00ffcc; }
-        .history-toggle { color: #52b3d9; cursor: pointer; text-decoration: underline; }
+        .history-toggle { color: #52b3d9; cursor: pointer; text-decoration: underline; font-weight: bold; }
 
         /* Holographic Central Core Visualizer */
         .orb-container {
@@ -59,6 +59,7 @@
             justify-content: center;
             box-shadow: 0 0 30px rgba(82, 179, 217, 0.15);
             transition: all 0.3s ease;
+            cursor: pointer;
         }
         .jarvis-orb::before {
             content: '';
@@ -93,7 +94,7 @@
         /* Real-Time Terminal Viewscreen */
         .display-panel {
             width: 100%;
-            max-height: 110px;
+            max-height: 120px;
             background: rgba(5, 24, 38, 0.7);
             border: 1px solid rgba(82, 179, 217, 0.25);
             border-radius: 6px;
@@ -168,77 +169,94 @@
         }
         .voice-trigger-btn:active { background: rgba(82, 179, 217, 0.1); }
 
-        /* Sliding Data Archival Drawer (Chat History) */
+        /* 🌌 UPGRADED SCI-FI CHAT HISTORY DRAWER */
         .history-drawer {
             position: absolute;
             top: 0;
             left: -100%;
-            width: 85%;
+            width: 90%;
             height: 100%;
-            background: #010508;
-            border-right: 2px solid rgba(82, 179, 217, 0.3);
+            background: rgba(2, 10, 18, 0.98);
+            border-right: 2px solid #52b3d9;
+            box-shadow: 5px 0 25px rgba(82, 179, 217, 0.3);
             z-index: 10;
             transition: left 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
             padding: 20px;
             display: flex;
             flex-direction: column;
+            backdrop-filter: blur(8px);
         }
         .history-drawer.open { left: 0; }
         .drawer-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(82, 179, 217, 0.3);
-            padding-bottom: 10px;
+            border-bottom: 1px solid #52b3d9;
+            padding-bottom: 12px;
             margin-bottom: 15px;
         }
-        .close-drawer { color: #ff3366; font-weight: bold; cursor: pointer; }
+        .drawer-title { font-weight: bold; letter-spacing: 1.5px; color: #52b3d9; text-shadow: 0 0 5px rgba(82,179,217,0.4); }
+        .close-drawer { color: #ff3366; font-weight: bold; cursor: pointer; font-size: 13px; }
+        
         .history-log-container {
             flex: 1;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
             padding-right: 5px;
         }
+        
+        /* Premium Sci-Fi Log Item Formatting */
         .history-item {
             font-size: 12px;
-            padding: 8px;
+            padding: 10px;
             border-radius: 4px;
-            line-height: 1.4;
+            line-height: 1.5;
+            border: 1px solid rgba(82, 179, 217, 0.15);
         }
-        .hist-user { background: rgba(255,255,255,0.03); color: #ffffff; border-left: 2px solid #52b3d9; }
-        .hist-luna { background: rgba(0,255,204,0.02); color: #00ffcc; border-left: 2px solid #00ffcc; }
+        .hist-user { 
+            background: rgba(255, 255, 255, 0.02); 
+            color: #ffffff; 
+            border-left: 3px solid #52b3d9; 
+        }
+        .hist-luna { 
+            background: rgba(0, 255, 204, 0.02); 
+            color: #00ffcc; 
+            border-left: 3px solid #00ffcc;
+            text-shadow: 0 0 2px rgba(0,255,204,0.2);
+        }
         
         .wipe-btn {
-            background: rgba(255, 51, 102, 0.1);
-            border: 1px solid #ff3366;
+            background: rgba(255, 51, 102, 0.05);
+            border: 1px dashed #ff3366;
             color: #ff3366;
-            padding: 10px;
+            padding: 12px;
             font-family: inherit;
             font-size: 11px;
             border-radius: 4px;
             cursor: pointer;
             margin-top: 15px;
             width: 100%;
+            letter-spacing: 1px;
         }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div>SYS: LUNA COUPLING V2</div>
+        <div>SYS: LUNA MATRIX V2.5</div>
         <div class="history-toggle" id="openHistoryBtn">📝 CHAT LOGS</div>
     </div>
 
     <div id="historyDrawer" class="history-drawer">
         <div class="drawer-header">
-            <span style="font-weight: bold; letter-spacing: 1px;">DATAFRAME RECOVERY</span>
-            <span class="close-drawer" id="closeHistoryBtn">[CLOSE]</span>
+            <span class="drawer-title">CORE_MEMORY_LOGS.log</span>
+            <span class="close-drawer" id="closeHistoryBtn">[DISENGAGE]</span>
         </div>
         <div id="historyLogContainer" class="history-log-container">
             </div>
-        <button id="wipeMemoryBtn" class="wipe-btn">PURGE 15-DAY STORAGE MATRIX</button>
+        <button id="wipeMemoryBtn" class="wipe-btn">WIPE SECURE ARCHIVE CACHE</button>
     </div>
 
     <div class="orb-container">
@@ -248,23 +266,21 @@
     </div>
 
     <div id="displayPanel" class="display-panel">
-        <div class="luna-text">V2 Interface online. Systems operational, Administrator Ayush.</div>
+        <div class="luna-text">Stream Interface online. Awaiting data parameters, Administrator Ayush.</div>
     </div>
 
     <div class="control-deck">
         <div class="text-input-container">
-            <input type="text" id="keyboardInput" class="jarvis-input" placeholder="Transmit standard text directive..." autocomplete="off">
+            <input type="text" id="keyboardInput" class="jarvis-input" placeholder="Transmit text directive..." autocomplete="off">
             <button id="sendTextBtn" class="send-btn">SEND</button>
         </div>
-        
         <button id="voiceTalkBtn" class="voice-trigger-btn">ENGAGE MIC COUPLING</button>
     </div>
 
     <script>
-        // Use relative path routing to completely safely neutralize CORS timeouts
+        // Target path routing points to streaming main.py
         const RENDER_BACKEND_URL = "/v1/chat/completions";
 
-        // Speech Recognition & Synthesis Engines
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         const synth = window.speechSynthesis;
         let recognition = SpeechRecognition ? new SpeechRecognition() : null;
@@ -275,7 +291,6 @@
             recognition.interimResults = false;
         }
 
-        // DOM Handles
         const jarvisOrb = document.getElementById('jarvisOrb');
         const orbStateText = document.getElementById('orbStateText');
         const displayPanel = document.getElementById('displayPanel');
@@ -283,27 +298,22 @@
         const keyboardInput = document.getElementById('keyboardInput');
         const sendTextBtn = document.getElementById('sendTextBtn');
         
-        // Drawer Handles
         const historyDrawer = document.getElementById('historyDrawer');
         const openHistoryBtn = document.getElementById('openHistoryBtn');
         const closeHistoryBtn = document.getElementById('closeHistoryBtn');
         const historyLogContainer = document.getElementById('historyLogContainer');
         const wipeMemoryBtn = document.getElementById('wipeMemoryBtn');
 
-        // Extract 15-Day Long-Term Storage Array
-        let chatHistory = JSON.parse(localStorage.getItem('luna_jarvis_history_v2')) || [];
+        let chatHistory = JSON.parse(localStorage.getItem('luna_jarvis_history_v25')) || [];
 
-        // Initialize and render structural files on startup
         renderLogsWindow();
 
-        // 📝 HISTORY DRAWER SYSTEM PANEL CONTROLS
         openHistoryBtn.addEventListener('click', () => {
             renderLogsWindow();
             historyDrawer.classList.add('open');
         });
         closeHistoryBtn.addEventListener('click', () => historyDrawer.classList.remove('open'));
         
-        // ⌨️ KEYBOARD MATRIX TRANSMISSION DIRECTIVES
         sendTextBtn.addEventListener('click', handleKeyboardTransmission);
         keyboardInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') handleKeyboardTransmission();
@@ -313,22 +323,19 @@
             const queryText = keyboardInput.value.trim();
             if(!queryText) return;
 
-            keyboardInput.value = ""; // Empty string field instantly
-            synth.cancel(); // Stop any pending speech synthesis
+            keyboardInput.value = "";
+            synth.cancel();
 
             displayPanel.innerHTML = `<div class="user-text">Ayush: "${queryText}"</div>`;
-            
-            // Record to local memory array
             chatHistory.push({ role: "user", content: queryText });
             saveLogsToPhone();
 
-            await linkWithLunaMatrix(queryText);
+            await linkWithLunaStream(queryText);
         }
 
-        // 🎙️ VOCAL CORE TRIGGER INTERFACE CONTROL
         const igniteVoiceMechanism = () => {
             if (!recognition) {
-                alert("Native vocal input stack mismatch inside this specific platform web wrapper.");
+                alert("Microphone capture stack unavailable inside this wrapper platform browser.");
                 return;
             }
             synth.cancel();
@@ -350,44 +357,74 @@
                 chatHistory.push({ role: "user", content: transcriptResult });
                 saveLogsToPhone();
 
-                await linkWithLunaMatrix(transcriptResult);
+                await linkWithLunaStream(transcriptResult);
             };
             recognition.onend = () => {
                 if (!jarvisOrb.classList.contains('speaking')) resetOrbStyle();
             };
         }
 
-        // ⚡ BACKGROUND SYNC PACKET TUNNEL PIPELINE
-        async function linkWithLunaMatrix(textPayload) {
+        // 🌪️ SCI-FI STREAM CHUNK READER ALGORITHM
+        async function linkWithLunaStream(textPayload) {
             orbStateText.innerText = "THINKING";
             try {
-                // Compile the past conversational threads into context data payloads
                 const runtimeContext = chatHistory.slice(-20).map(msg => ({
                     role: msg.role,
                     content: msg.content
                 }));
 
-                const matrixResponse = await fetch(RENDER_BACKEND_URL, {
+                const response = await fetch(RENDER_BACKEND_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         model: "luna-genesis-v1",
                         messages: runtimeContext,
-                        stream: false
+                        stream: true
                     })
                 });
 
-                const structuralData = await matrixResponse.json();
-                const processedReply = structuralData.choices[0].message.content;
+                if (!response.body) {
+                    throw new Error("Stream data framework missing.");
+                }
 
-                // Commit Response to Long-Term Memory Storage Arrays
-                chatHistory.push({ role: "assistant", content: processedReply });
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder("utf-8");
+                let completeResponse = "";
+
+                displayPanel.innerHTML += `<div id="lunaStreamingActive" class="luna-text">Luna: "</div>`;
+                const streamingContainer = document.getElementById("lunaStreamingActive");
+
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value, { stream: true });
+                    const lines = chunk.split("\n");
+
+                    for (const line of lines) {
+                        const sanitizedLine = line.trim();
+                        if (!sanitizedLine.startsWith("data:")) continue;
+                        if (sanitizedLine === "data: [DONE]") break;
+
+                        try {
+                            const parsedJSON = jsonParseChunk(sanitizedLine.substring(5).trim());
+                            if (parsedJSON && parsedJSON.choices && parsedJSON.choices[0].delta.content) {
+                                const characterPiece = parsedJSON.choices[0].delta.content;
+                                completeResponse += characterPiece;
+                                // Append word blocks cleanly into real-time visual grid
+                                streamingContainer.innerText = `Luna: "${completeResponse}"`;
+                                displayPanel.scrollTop = displayPanel.scrollHeight;
+                            }
+                        } catch (e) {}
+                    }
+                }
+
+                // Clean formatting encapsulation
+                streamingContainer.innerText = `Luna: "${completeResponse}"`;
+                chatHistory.push({ role: "assistant", content: completeResponse });
                 saveLogsToPhone();
 
-                // Echo and Speak Out Loud
-                displayPanel.innerHTML += `<div class="luna-text">Luna: "${processedReply}"</div>`;
-                displayPanel.scrollTop = displayPanel.scrollHeight;
-                executeVocalProjection(processedReply);
+                executeVocalProjection(completeResponse);
 
             } catch (err) {
                 displayPanel.innerHTML += `<div style="color: #ff3366;">[Link Fault]: Sync pipeline dropped.</div>`;
@@ -395,7 +432,10 @@
             }
         }
 
-        // 🔊 VOCAL RENDERING ARCHITECTURE
+        function jsonParseChunk(str) {
+            try { return JSON.parse(str); } catch(e) { return null; }
+        }
+
         function executeVocalProjection(rawText) {
             jarvisOrb.className = "jarvis-orb speaking";
             orbStateText.innerText = "SPEAKING";
@@ -414,12 +454,12 @@
         }
 
         function saveLogsToPhone() {
-            localStorage.setItem('luna_jarvis_history_v2', JSON.stringify(chatHistory));
+            localStorage.setItem('luna_jarvis_history_v25', JSON.stringify(chatHistory));
         }
 
         function renderLogsWindow() {
             historyLogContainer.innerHTML = chatHistory.length === 0 
-                ? `<div style="color:rgba(82,179,217,0.4); text-align:center; padding-top:20px; font-size:12px;">No historical data records saved.</div>`
+                ? `<div style="color:rgba(82,179,217,0.4); text-align:center; padding-top:20px; font-size:12px;">No logged data fragments found.</div>`
                 : chatHistory.map(msg => {
                     const label = msg.role === 'user' ? 'AYUSH' : 'LUNA';
                     const cssClass = msg.role === 'user' ? 'hist-user' : 'hist-luna';
@@ -429,11 +469,11 @@
         }
 
         wipeMemoryBtn.addEventListener('click', () => {
-            if(confirm("Confirm deletion of entire 15-day architectural memory history matrix?")) {
+            if(confirm("Purge all local log matrices?")) {
                 chatHistory = [];
-                localStorage.removeItem('luna_jarvis_history_v2');
+                localStorage.removeItem('luna_jarvis_history_v25');
                 renderLogsWindow();
-                displayPanel.innerHTML = `<div class="luna-text">Logs wiped. Architectural tracking at 0.</div>`;
+                displayPanel.innerHTML = `<div class="luna-text">Logs wiped. Matrix cleared.</div>`;
                 historyDrawer.classList.remove('open');
             }
         });
