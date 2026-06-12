@@ -3,249 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LUNA — JARVIS CORE V2.5</title>
+    <title>LUNA — JARVIS CORE V3</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            background-color: #02080d;
-            color: #52b3d9;
-            font-family: 'Courier New', Courier, monospace;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            height: 100vh;
-            overflow: hidden;
-            padding: 20px;
-            position: relative;
+            background-color: #02080d; color: #52b3d9; font-family: 'Courier New', Courier, monospace;
+            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            height: 100vh; overflow: hidden; padding: 20px; position: relative;
         }
-        
-        /* Top Navigation Protocol */
-        .header {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            font-size: 11px;
-            letter-spacing: 2px;
-            border-bottom: 1px solid rgba(82, 179, 217, 0.2);
-            padding-bottom: 8px;
-            z-index: 5;
-        }
+        .header { width: 100%; display: flex; justify-content: space-between; font-size: 11px; letter-spacing: 2px; border-bottom: 1px solid rgba(82, 179, 217, 0.2); padding-bottom: 8px; z-index: 5; }
         .status-online { color: #00ffcc; text-shadow: 0 0 8px #00ffcc; }
         .history-toggle { color: #52b3d9; cursor: pointer; text-decoration: underline; font-weight: bold; }
-
-        /* Holographic Central Core Visualizer */
-        .orb-container {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            width: 100%;
-        }
+        .orb-container { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; width: 100%; }
         .jarvis-orb {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
+            width: 200px; height: 200px; border-radius: 50%;
             background: radial-gradient(circle, rgba(2,15,26,1) 0%, rgba(5,42,69,0.3) 60%, rgba(82,179,217,0.05) 100%);
-            border: 2px dashed rgba(82, 179, 217, 0.4);
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 30px rgba(82, 179, 217, 0.15);
-            transition: all 0.3s ease;
-            cursor: pointer;
+            border: 2px dashed rgba(82, 179, 217, 0.4); position: relative; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 30px rgba(82, 179, 217, 0.15); transition: all 0.3s ease; cursor: pointer;
         }
-        .jarvis-orb::before {
-            content: '';
-            position: absolute;
-            width: 160px;
-            height: 160px;
-            border-radius: 50%;
-            border: 3px double #52b3d9;
-            box-shadow: 0 0 15px rgba(82, 179, 217, 0.4);
-            animation: rotateOrb 12s linear infinite;
-        }
-        .jarvis-orb::after {
-            content: '';
-            position: absolute;
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            border: 1px solid #00ffcc;
-            box-shadow: inset 0 0 15px rgba(0, 255, 204, 0.2);
-            animation: pulseCore 2.5s ease-in-out infinite;
-        }
-        
-        /* Interactive States for Orb Visualizer */
+        .jarvis-orb::before { content: ''; position: absolute; width: 160px; height: 160px; border-radius: 50%; border: 3px double #52b3d9; box-shadow: 0 0 15px rgba(82, 179, 217, 0.4); animation: rotateOrb 12s linear infinite; }
+        .jarvis-orb::after { content: ''; position: absolute; width: 100px; height: 100px; border-radius: 50%; border: 1px solid #00ffcc; box-shadow: inset 0 0 15px rgba(0, 255, 204, 0.2); animation: pulseCore 2.5s ease-in-out infinite; }
         .jarvis-orb.listening { border-color: #00ffcc; box-shadow: 0 0 40px rgba(0, 255, 204, 0.5); }
         .jarvis-orb.listening::before { border-color: #00ffcc; animation-duration: 4s; }
         .jarvis-orb.speaking { border-color: #ff3366; box-shadow: 0 0 40px rgba(255, 51, 102, 0.5); }
         .jarvis-orb.speaking::before { border-color: #ff3366; animation-duration: 2s; }
-
         @keyframes rotateOrb { 100% { transform: rotate(360deg); } }
         @keyframes pulseCore { 0%, 100% { transform: scale(0.95); opacity: 0.5; } 50% { transform: scale(1.05); opacity: 1; } }
-
-        /* Real-Time Terminal Viewscreen */
-        .display-panel {
-            width: 100%;
-            max-height: 120px;
-            background: rgba(5, 24, 38, 0.7);
-            border: 1px solid rgba(82, 179, 217, 0.25);
-            border-radius: 6px;
-            padding: 12px;
-            font-size: 13px;
-            overflow-y: auto;
-            text-align: center;
-            margin-bottom: 12px;
-        }
+        .display-panel { width: 100%; max-height: 120px; background: rgba(5, 24, 38, 0.7); border: 1px solid rgba(82, 179, 217, 0.25); border-radius: 6px; padding: 12px; font-size: 13px; overflow-y: auto; text-align: center; margin-bottom: 12px; }
         .user-text { color: #ffffff; margin-bottom: 4px; font-style: italic; }
         .luna-text { color: #00ffcc; font-weight: bold; text-shadow: 0 0 4px rgba(0,255,204,0.3); }
-
-        /* Dual Input Control Deck */
-        .control-deck {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            align-items: center;
-            z-index: 5;
-        }
-        
-        /* Hybrid Keyboard Input Bar */
-        .text-input-container {
-            display: flex;
-            width: 100%;
-            background: rgba(5, 24, 38, 0.8);
-            border: 1px solid rgba(82, 179, 217, 0.4);
-            border-radius: 4px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-        .text-input-container:focus-within {
-            border-color: #00ffcc;
-            box-shadow: 0 0 10px rgba(0, 255, 204, 0.2);
-        }
-        .jarvis-input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            outline: none;
-            color: #ffffff;
-            padding: 12px;
-            font-family: inherit;
-            font-size: 14px;
-        }
-        .send-btn {
-            background: rgba(82, 179, 217, 0.15);
-            border: none;
-            border-left: 1px solid rgba(82, 179, 217, 0.4);
-            color: #52b3d9;
-            padding: 0 16px;
-            cursor: pointer;
-            font-family: inherit;
-            font-weight: bold;
-        }
+        .control-deck { width: 100%; display: flex; flex-direction: column; gap: 10px; align-items: center; z-index: 5; }
+        .text-input-container { display: flex; width: 100%; background: rgba(5, 24, 38, 0.8); border: 1px solid rgba(82, 179, 217, 0.4); border-radius: 4px; overflow: hidden; transition: all 0.3s ease; }
+        .text-input-container:focus-within { border-color: #00ffcc; box-shadow: 0 0 10px rgba(0, 255, 204, 0.2); }
+        .jarvis-input { flex: 1; background: transparent; border: none; outline: none; color: #ffffff; padding: 12px; font-family: inherit; font-size: 14px; }
+        .send-btn { background: rgba(82, 179, 217, 0.15); border: none; border-left: 1px solid rgba(82, 179, 217, 0.4); color: #52b3d9; padding: 0 16px; cursor: pointer; font-family: inherit; font-weight: bold; }
         .send-btn:active { background: rgba(0, 255, 204, 0.2); color: #00ffcc; }
-
-        .voice-trigger-btn {
-            background: transparent;
-            border: 1px dashed #52b3d9;
-            color: #52b3d9;
-            padding: 12px;
-            font-size: 12px;
-            font-family: inherit;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            border-radius: 4px;
-            cursor: pointer;
-            width: 100%;
-            text-align: center;
-        }
-        .voice-trigger-btn:active { background: rgba(82, 179, 217, 0.1); }
-
-        /* 🌌 UPGRADED SCI-FI CHAT HISTORY DRAWER */
-        .history-drawer {
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 90%;
-            height: 100%;
-            background: rgba(2, 10, 18, 0.98);
-            border-right: 2px solid #52b3d9;
-            box-shadow: 5px 0 25px rgba(82, 179, 217, 0.3);
-            z-index: 10;
-            transition: left 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            backdrop-filter: blur(8px);
-        }
+        .voice-trigger-btn { background: transparent; border: 1px dashed #52b3d9; color: #52b3d9; padding: 12px; font-size: 12px; font-family: inherit; letter-spacing: 2px; text-transform: uppercase; border-radius: 4px; cursor: pointer; width: 100%; text-align: center; }
+        .history-drawer { position: absolute; top: 0; left: -100%; width: 90%; height: 100%; background: rgba(2, 10, 18, 0.98); border-right: 2px solid #52b3d9; box-shadow: 5px 0 25px rgba(82, 179, 217, 0.3); z-index: 10; transition: left 0.3s cubic-bezier(0.1, 0.9, 0.2, 1); padding: 20px; display: flex; flex-direction: column; backdrop-filter: blur(8px); }
         .history-drawer.open { left: 0; }
-        .drawer-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #52b3d9;
-            padding-bottom: 12px;
-            margin-bottom: 15px;
-        }
+        .drawer-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #52b3d9; padding-bottom: 12px; margin-bottom: 15px; }
         .drawer-title { font-weight: bold; letter-spacing: 1.5px; color: #52b3d9; text-shadow: 0 0 5px rgba(82,179,217,0.4); }
         .close-drawer { color: #ff3366; font-weight: bold; cursor: pointer; font-size: 13px; }
-        
-        .history-log-container {
-            flex: 1;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            padding-right: 5px;
-        }
-        
-        /* Premium Sci-Fi Log Item Formatting */
-        .history-item {
-            font-size: 12px;
-            padding: 10px;
-            border-radius: 4px;
-            line-height: 1.5;
-            border: 1px solid rgba(82, 179, 217, 0.15);
-        }
-        .hist-user { 
-            background: rgba(255, 255, 255, 0.02); 
-            color: #ffffff; 
-            border-left: 3px solid #52b3d9; 
-        }
-        .hist-luna { 
-            background: rgba(0, 255, 204, 0.02); 
-            color: #00ffcc; 
-            border-left: 3px solid #00ffcc;
-            text-shadow: 0 0 2px rgba(0,255,204,0.2);
-        }
-        
-        .wipe-btn {
-            background: rgba(255, 51, 102, 0.05);
-            border: 1px dashed #ff3366;
-            color: #ff3366;
-            padding: 12px;
-            font-family: inherit;
-            font-size: 11px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 15px;
-            width: 100%;
-            letter-spacing: 1px;
-        }
+        .history-log-container { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 5px; }
+        .history-item { font-size: 12px; padding: 10px; border-radius: 4px; line-height: 1.5; border: 1px solid rgba(82, 179, 217, 0.15); }
+        .hist-user { background: rgba(255, 255, 255, 0.02); color: #ffffff; border-left: 3px solid #52b3d9; }
+        .hist-luna { background: rgba(0, 255, 204, 0.02); color: #00ffcc; border-left: 3px solid #00ffcc; text-shadow: 0 0 2px rgba(0,255,204,0.2); }
+        .wipe-btn { background: rgba(255, 51, 102, 0.05); border: 1px dashed #ff3366; color: #ff3366; padding: 12px; font-family: inherit; font-size: 11px; border-radius: 4px; cursor: pointer; margin-top: 15px; width: 100%; letter-spacing: 1px; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div>SYS: LUNA MATRIX V2.5</div>
+        <div>SYS: LUNA MATRIX V3.0</div>
         <div class="history-toggle" id="openHistoryBtn">📝 CHAT LOGS</div>
     </div>
 
@@ -254,8 +63,7 @@
             <span class="drawer-title">CORE_MEMORY_LOGS.log</span>
             <span class="close-drawer" id="closeHistoryBtn">[DISENGAGE]</span>
         </div>
-        <div id="historyLogContainer" class="history-log-container">
-            </div>
+        <div id="historyLogContainer" class="history-log-container"></div>
         <button id="wipeMemoryBtn" class="wipe-btn">WIPE SECURE ARCHIVE CACHE</button>
     </div>
 
@@ -266,7 +74,7 @@
     </div>
 
     <div id="displayPanel" class="display-panel">
-        <div class="luna-text">Stream Interface online. Awaiting data parameters, Administrator Ayush.</div>
+        <div class="luna-text">Neural Voice Module Active. Standing by, Ayush.</div>
     </div>
 
     <div class="control-deck">
@@ -278,18 +86,11 @@
     </div>
 
     <script>
-        // Target path routing points to streaming main.py
         const RENDER_BACKEND_URL = "/v1/chat/completions";
-
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const synth = window.speechSynthesis;
         let recognition = SpeechRecognition ? new SpeechRecognition() : null;
         
-        if(recognition) {
-            recognition.continuous = false;
-            recognition.lang = 'en-US';
-            recognition.interimResults = false;
-        }
+        if(recognition) { recognition.continuous = false; recognition.lang = 'en-US'; recognition.interimResults = false; }
 
         const jarvisOrb = document.getElementById('jarvisOrb');
         const orbStateText = document.getElementById('orbStateText');
@@ -297,185 +98,128 @@
         const voiceTalkBtn = document.getElementById('voiceTalkBtn');
         const keyboardInput = document.getElementById('keyboardInput');
         const sendTextBtn = document.getElementById('sendTextBtn');
-        
         const historyDrawer = document.getElementById('historyDrawer');
         const openHistoryBtn = document.getElementById('openHistoryBtn');
-        const closeHistoryBtn = document.getElementById('closeHistoryBtn');
         const historyLogContainer = document.getElementById('historyLogContainer');
         const wipeMemoryBtn = document.getElementById('wipeMemoryBtn');
 
-        let chatHistory = JSON.parse(localStorage.getItem('luna_jarvis_history_v25')) || [];
-
+        let chatHistory = JSON.parse(localStorage.getItem('luna_jarvis_history_v3')) || [];
         renderLogsWindow();
 
-        openHistoryBtn.addEventListener('click', () => {
-            renderLogsWindow();
-            historyDrawer.classList.add('open');
-        });
-        closeHistoryBtn.addEventListener('click', () => historyDrawer.classList.remove('open'));
-        
+        openHistoryBtn.addEventListener('click', () => { renderLogsWindow(); historyDrawer.classList.add('open'); });
+        document.getElementById('closeHistoryBtn').addEventListener('click', () => historyDrawer.classList.remove('open'));
         sendTextBtn.addEventListener('click', handleKeyboardTransmission);
-        keyboardInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleKeyboardTransmission();
-        });
+        keyboardInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleKeyboardTransmission(); });
 
         async function handleKeyboardTransmission() {
             const queryText = keyboardInput.value.trim();
             if(!queryText) return;
-
             keyboardInput.value = "";
-            synth.cancel();
-
             displayPanel.innerHTML = `<div class="user-text">Ayush: "${queryText}"</div>`;
             chatHistory.push({ role: "user", content: queryText });
             saveLogsToPhone();
-
-            await linkWithLunaStream(queryText);
+            await connectWithLunaNeuralStream(queryText);
         }
 
-        const igniteVoiceMechanism = () => {
-            if (!recognition) {
-                alert("Microphone capture stack unavailable inside this wrapper platform browser.");
-                return;
-            }
-            synth.cancel();
-            recognition.start();
-        };
-
+        const igniteVoiceMechanism = () => { if (!recognition) { alert("Mic unavailable."); return; } recognition.start(); };
         jarvisOrb.addEventListener('click', igniteVoiceMechanism);
         voiceTalkBtn.addEventListener('click', igniteVoiceMechanism);
 
         if(recognition) {
-            recognition.onstart = () => {
-                jarvisOrb.className = "jarvis-orb listening";
-                orbStateText.innerText = "LISTENING";
-            };
+            recognition.onstart = () => { jarvisOrb.className = "jarvis-orb listening"; orbStateText.innerText = "LISTENING"; };
             recognition.onresult = async (event) => {
                 const transcriptResult = event.results[0][0].transcript;
                 displayPanel.innerHTML = `<div class="user-text">Ayush: "${transcriptResult}"</div>`;
-                
                 chatHistory.push({ role: "user", content: transcriptResult });
                 saveLogsToPhone();
-
-                await linkWithLunaStream(transcriptResult);
+                await connectWithLunaNeuralStream(transcriptResult);
             };
-            recognition.onend = () => {
-                if (!jarvisOrb.classList.contains('speaking')) resetOrbStyle();
-            };
+            recognition.onend = () => { if (!jarvisOrb.classList.contains('speaking')) resetOrbStyle(); };
         }
 
-        // 🌪️ SCI-FI STREAM CHUNK READER ALGORITHM
-        async function linkWithLunaStream(textPayload) {
+        // 🌪️ PARSE DUAL MULTIPART TEXT AND AUDIO PIPELINES
+        async function connectWithLunaNeuralStream(textPayload) {
             orbStateText.innerText = "THINKING";
             try {
-                const runtimeContext = chatHistory.slice(-20).map(msg => ({
-                    role: msg.role,
-                    content: msg.content
-                }));
-
+                const runtimeContext = chatHistory.slice(-20).map(msg => ({ role: msg.role, content: msg.content }));
                 const response = await fetch(RENDER_BACKEND_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        model: "luna-genesis-v1",
-                        messages: runtimeContext,
-                        stream: true
-                    })
+                    body: JSON.stringify({ model: "luna-genesis-v1", messages: runtimeContext, stream: false })
                 });
 
-                if (!response.body) {
-                    throw new Error("Stream data framework missing.");
-                }
+                if (!response.body) throw new Error("Data drop.");
+                
+                const responseReader = response.body.getReader();
+                let combinedBuffer = new Uint8Array(0);
 
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder("utf-8");
-                let completeResponse = "";
-
-                displayPanel.innerHTML += `<div id="lunaStreamingActive" class="luna-text">Luna: "</div>`;
-                const streamingContainer = document.getElementById("lunaStreamingActive");
-
+                // Read all binary packets from server stream
                 while (true) {
-                    const { value, done } = await reader.read();
+                    const { value, done } = await responseReader.read();
                     if (done) break;
-
-                    const chunk = decoder.decode(value, { stream: true });
-                    const lines = chunk.split("\n");
-
-                    for (const line of lines) {
-                        const sanitizedLine = line.trim();
-                        if (!sanitizedLine.startsWith("data:")) continue;
-                        if (sanitizedLine === "data: [DONE]") break;
-
-                        try {
-                            const parsedJSON = jsonParseChunk(sanitizedLine.substring(5).trim());
-                            if (parsedJSON && parsedJSON.choices && parsedJSON.choices[0].delta.content) {
-                                const characterPiece = parsedJSON.choices[0].delta.content;
-                                completeResponse += characterPiece;
-                                // Append word blocks cleanly into real-time visual grid
-                                streamingContainer.innerText = `Luna: "${completeResponse}"`;
-                                displayPanel.scrollTop = displayPanel.scrollHeight;
-                            }
-                        } catch (e) {}
-                    }
+                    let newBuffer = new Uint8Array(combinedBuffer.length + value.length);
+                    newBuffer.set(combinedBuffer);
+                    newBuffer.set(value, combinedBuffer.length);
+                    combinedBuffer = newBuffer;
                 }
 
-                // Clean formatting encapsulation
-                streamingContainer.innerText = `Luna: "${completeResponse}"`;
-                chatHistory.push({ role: "assistant", content: completeResponse });
-                saveLogsToPhone();
+                // Split text info segment from raw audio bytes
+                const textDecoder = new TextDecoder("utf-8");
+                const fullRawString = textDecoder.decode(combinedBuffer);
+                const textDelimiter = "text_data:";
+                
+                if (fullRawString.includes(textDelimiter)) {
+                    const lineEndIndex = fullRawString.indexOf("\n\n");
+                    const rawJsonString = fullRawString.substring(textDelimiter.length, lineEndIndex);
+                    const parsedMessageData = JSON.parse(rawJsonString);
+                    const textReply = parsedMessageData.luna_text;
 
-                executeVocalProjection(completeResponse);
+                    // Print log text
+                    displayPanel.innerHTML = `<div class="user-text">Ayush: "${textPayload}"</div><div class="luna-text">Luna: "${textReply}"</div>`;
+                    chatHistory.push({ role: "assistant", content: textReply });
+                    saveLogsToPhone();
+
+                    // Calculate index offset where binary audio packets begin
+                    const audioBinaryStartOffset = lineEndIndex + 2;
+                    const audioBufferBytes = combinedBuffer.slice(audioBinaryStartOffset);
+                    
+                    // Fire audio stream play
+                    executeNeuralVocalPlayback(audioBufferBytes);
+                }
 
             } catch (err) {
-                displayPanel.innerHTML += `<div style="color: #ff3366;">[Link Fault]: Sync pipeline dropped.</div>`;
+                displayPanel.innerHTML += `<div style="color: #ff3366;">[Link Fault]: Neural buffer sync dropped.</div>`;
                 resetOrbStyle();
             }
         }
 
-        function jsonParseChunk(str) {
-            try { return JSON.parse(str); } catch(e) { return null; }
-        }
-
-        function executeVocalProjection(rawText) {
+        // Play high-fidelity binary audio packets directly through device speaker
+        function executeNeuralVocalPlayback(audioBytes) {
             jarvisOrb.className = "jarvis-orb speaking";
             orbStateText.innerText = "SPEAKING";
 
-            const vocalWaveform = new SpeechSynthesisUtterance(rawText);
-            vocalWaveform.rate = 1.05;
-            vocalWaveform.pitch = 1.1;
-
-            vocalWaveform.onend = () => resetOrbStyle();
-            synth.speak(vocalWaveform);
+            const audioBlob = new Blob([audioBytes], { type: "audio/mpeg" });
+            const audioUrl = URL.createObjectURL(audioBlob);
+            const nativeAudioPlayer = new Audio(audioUrl);
+            
+            nativeAudioPlayer.onended = () => { resetOrbStyle(); URL.revokeObjectURL(audioUrl); };
+            nativeAudioPlayer.play().catch(() => { resetOrbStyle(); });
         }
 
-        function resetOrbStyle() {
-            jarvisOrb.className = "jarvis-orb";
-            orbStateText.innerText = "TAP TO TALK";
-        }
-
-        function saveLogsToPhone() {
-            localStorage.setItem('luna_jarvis_history_v25', JSON.stringify(chatHistory));
-        }
-
+        function resetOrbStyle() { jarvisOrb.className = "jarvis-orb"; orbStateText.innerText = "TAP TO TALK"; }
+        function saveLogsToPhone() { localStorage.setItem('luna_jarvis_history_v3', JSON.stringify(chatHistory)); }
         function renderLogsWindow() {
             historyLogContainer.innerHTML = chatHistory.length === 0 
-                ? `<div style="color:rgba(82,179,217,0.4); text-align:center; padding-top:20px; font-size:12px;">No logged data fragments found.</div>`
+                ? `<div style="color:rgba(82,179,217,0.4); text-align:center; padding-top:20px;">No logged data fragments.</div>`
                 : chatHistory.map(msg => {
                     const label = msg.role === 'user' ? 'AYUSH' : 'LUNA';
-                    const cssClass = msg.role === 'user' ? 'hist-user' : 'hist-luna';
-                    return `<div class="history-item ${cssClass}"><strong>[${label}]:</strong> ${msg.content}</div>`;
+                    return `<div class="history-item ${msg.role === 'user' ? 'hist-user' : 'hist-luna'}"><strong>[${label}]:</strong> ${msg.content}</div>`;
                   }).join('');
             historyLogContainer.scrollTop = historyLogContainer.scrollHeight;
         }
 
         wipeMemoryBtn.addEventListener('click', () => {
-            if(confirm("Purge all local log matrices?")) {
-                chatHistory = [];
-                localStorage.removeItem('luna_jarvis_history_v25');
-                renderLogsWindow();
-                displayPanel.innerHTML = `<div class="luna-text">Logs wiped. Matrix cleared.</div>`;
-                historyDrawer.classList.remove('open');
-            }
+            if(confirm("Purge chat memory?")) { chatHistory = []; localStorage.removeItem('luna_jarvis_history_v3'); renderLogsWindow(); historyDrawer.classList.remove('open'); }
         });
     </script>
 </body>
