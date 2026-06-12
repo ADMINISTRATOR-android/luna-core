@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LUNA — DECK MULTI-MATRIX V7.6</title>
+    <title>LUNA — HEAVY QUANTUM MATRIX V6.0</title>
     <style>
         :root {
             --neon-blue: #00f3ff;
             --neon-glow: rgba(0, 243, 255, 0.4);
-            --matrix-dark: #020813;
-            --panel-bg: rgba(2, 16, 29, 0.65);
-            --border-glow: rgba(0, 243, 255, 0.12);
+            --matrix-dark: #01060c;
+            --panel-bg: rgba(2, 16, 29, 0.6);
+            --border-glow: rgba(0, 243, 255, 0.15);
             --neon-pink: #ff2a6d;
             --neon-green: #05ff9e;
             --grid-color: rgba(0, 243, 255, 0.02);
@@ -30,76 +30,128 @@
             position: relative;
         }
 
-        /* Ambient Technical Grid Backdrop */
+        /* Sci-Fi Digital Grid Background */
         body::before {
             content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-image: linear-gradient(var(--grid-color) 1px, transparent 1px),
                               linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-            background-size: 25px 25px; z-index: 1; pointer-events: none;
+            background-size: 20px 20px; z-index: 1; pointer-events: none;
         }
 
-        /* Top HUD Status Banner */
+        /* HUD Header */
         .hud-header {
             width: 100%; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
-            border: 1px solid var(--border-glow); background: var(--panel-bg); backdrop-filter: blur(10px);
+            border: 1px solid var(--border-glow); background: var(--panel-bg); backdrop-filter: blur(8px);
             padding: 8px 12px; font-size: 10px; letter-spacing: 2px; z-index: 10;
         }
         .sys-title { font-weight: bold; color: var(--neon-blue); text-shadow: 0 0 6px var(--neon-glow); }
-        .sys-status { text-align: center; color: var(--neon-blue); display: flex; align-items: center; gap: 6px; justify-content: center; }
-        .pulse-dot { width: 4px; height: 4px; background: var(--neon-blue); border-radius: 50%; animation: blink 1.2s infinite; }
-        .history-trigger { text-align: right; color: #70b9d9; cursor: pointer; font-weight: bold; }
+        .sys-status { text-align: center; color: var(--neon-green); display: flex; align-items: center; gap: 6px; justify-content: center; }
+        .pulse-dot { width: 4px; height: 4px; background: var(--neon-green); border-radius: 50%; animation: blink 1s infinite; }
+        .history-trigger { text-align: right; color: #70b9d9; cursor: pointer; }
 
-        /* Central Hologram Stage Frame */
+        /* Main Stage Frame */
         .hud-container {
             flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            position: relative; width: 100%; z-index: 2;
+            position: relative; width: 100%; z-index: 2; perspective: 1200px;
         }
 
-        /* WIDE QUANTUM FIELD STAGE */
-        .quantum-canvas-frame {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 380px;
+        /* ⚛️ HEAVY ATOMIC MULTI-ORBIT STAGE */
+        .nuclear-stage {
+            position: relative; display: flex; align-items: center; justify-content: center;
+            width: 360px; height: 360px; transform-style: preserve-3d;
+            animation: structureFloat 10s ease-in-out infinite; /* Slower overall ambient float */
         }
 
-        #particleCanvas {
+        /* Base Calibration Ring */
+        .hud-bracket {
+            position: absolute; width: 340px; height: 340px;
+            border: 1px dashed rgba(0, 243, 255, 0.03); border-radius: 50%;
+            transform: rotateX(80deg);
+        }
+
+        /* Base Specifications for all Elliptical Orbit Tracks */
+        .electron-orbit {
             position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 3;
-            pointer-events: none;
+            width: 340px;
+            height: 110px;
+            border: 1px solid rgba(0, 243, 255, 0.12);
+            border-radius: 50%;
+            transform-style: preserve-3d;
         }
 
-        /* Center Circle "STABLE" Indicator Core */
+        /* Traveling Electron Nodes */
+        .electron-orbit::after {
+            content: ''; position: absolute; top: 50%; left: 0;
+            width: 7px; height: 7px;
+            border-radius: 50%; box-shadow: 0 0 14px currentColor, 0 0 4px #ffffff;
+            transform: translate(-3.5px, -3.5px);
+        }
+
+        /* 🪐 7-ORBIT KINETIC REGIME (Slowing down processing cycle) */
+        
+        /* Orbit 1: 30 Deg Skew - Neon Blue (Slowed to 7s) */
+        .orbit-1 { color: var(--neon-blue); transform: rotateZ(30deg) rotateX(68deg); animation: quantumLoop 7s linear infinite; }
+        .orbit-1::after { background: var(--neon-blue); }
+
+        /* Orbit 2: -30 Deg Skew Counter-track - Neon Green (Slowed to 5.5s) */
+        .orbit-2 { color: var(--neon-green); transform: rotateZ(-30deg) rotateX(68deg); animation: quantumLoop 5.5s linear infinite reverse; animation-delay: -1s; }
+        .orbit-2::after { background: var(--neon-green); }
+
+        /* Orbit 3: 65 Deg Vertical Shift - Neon Pink (Slowed to 9s) */
+        .orbit-3 { color: var(--neon-pink); transform: rotateZ(65deg) rotateX(72deg); animation: quantumLoop 9s linear infinite; animation-delay: -2.5s; }
+        .orbit-3::after { background: var(--neon-pink); }
+
+        /* Orbit 4: -65 Deg Vertical Shift Counter-track - Neon Blue (Slowed to 8s) */
+        .orbit-4 { color: var(--neon-blue); transform: rotateZ(-65deg) rotateX(72deg); animation: quantumLoop 8s linear infinite reverse; animation-delay: -4s; }
+        .orbit-4::after { background: var(--neon-blue); }
+
+        /* Orbit 5: Deep 90 Deg Vertical Meridian Axis (Slowed to 11s) */
+        .orbit-5 { color: #ffaa00; transform: rotateZ(90deg) rotateX(75deg); animation: quantumLoop 11s linear infinite; animation-delay: -1.5s; }
+        .orbit-5::after { background: #ffaa00; }
+
+        /* Orbit 6: Low Plane Horizontal Ring (Slowed to 13s) */
+        .orbit-6 { color: var(--neon-green); transform: rotateZ(10deg) rotateX(60deg); width: 290px; height: 95px; animation: quantumLoop 13s linear infinite reverse; }
+        .orbit-6::after { background: var(--neon-green); }
+
+        /* Orbit 7: High Steep Cross-cutting Track (Slowed to 10s) */
+        .orbit-7 { color: var(--neon-pink); transform: rotateZ(-115deg) rotateX(64deg); width: 310px; height: 105px; animation: quantumLoop 10s linear infinite; }
+        .orbit-7::after { background: var(--neon-pink); }
+
+
+        /* Core Reactor Nucleus */
         .jarvis-orb {
-            width: 110px; height: 110px; border-radius: 50%;
-            background: radial-gradient(circle, rgba(2,10,22,0.98) 0%, rgba(1,5,12,1) 85%);
-            border: 2px solid rgba(0, 243, 255, 0.5);
+            width: 105px; height: 105px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,243,255,0.2) 0%, rgba(2,12,24,0.95) 65%, transparent 100%);
+            border: 2px solid rgba(0, 243, 255, 0.45);
             position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            box-shadow: 0 0 30px rgba(0, 243, 255, 0.25), inset 0 0 15px rgba(0, 243, 255, 0.2);
-            transition: all 0.4s ease; cursor: pointer; z-index: 10;
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.25), inset 0 0 15px rgba(0, 243, 255, 0.15);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; z-index: 10;
         }
 
-        .jarvis-orb::before {
-            content: ''; position: absolute; width: 90px; height: 90px; border-radius: 50%;
-            border: 1px dashed rgba(0, 243, 255, 0.25);
-            animation: coreSpin 30s linear infinite;
+        /* Inner Heavy Energy Proton Mass */
+        .jarvis-orb::after {
+            content: ''; position: absolute; width: 38px; height: 38px; border-radius: 50%;
+            background: radial-gradient(circle, #ffffff 0%, rgba(0,243,255,0.6) 50%, transparent 100%);
+            box-shadow: 0 0 25px var(--neon-blue);
+            animation: nucleusEnergy 2s ease-in-out infinite alternate; /* Slower, pulsing core energy */
         }
 
-        #orbLabel { font-size: 10px; font-weight: bold; letter-spacing: 2.5px; color: var(--neon-blue); z-index: 15; text-shadow: 0 0 5px var(--neon-blue); pointer-events: none; }
+        /* 🎛️ RE-GEN STRUCTURAL SYSTEM MATRIX MODES */
+        .jarvis-orb.listening { border-color: var(--neon-green); box-shadow: 0 0 40px rgba(5, 255, 158, 0.4); }
+        .jarvis-orb.listening::after { background: var(--neon-green); box-shadow: 0 0 30px var(--neon-green); animation-duration: 0.8s; }
 
-        /* Reactive Structural State Shifts */
-        .jarvis-orb.listening { border-color: var(--neon-green); box-shadow: 0 0 40px rgba(5, 255, 158, 0.35); }
-        .jarvis-orb.thinking { border-color: #ffaa00; animation: coreJitter 0.15s infinite; }
-        .jarvis-orb.speaking { border-color: var(--neon-pink); box-shadow: 0 0 40px rgba(255, 42, 109, 0.35); }
+        .jarvis-orb.thinking { border-color: #ffaa00; animation: atomicJitter 0.2s infinite; }
+        .jarvis-orb.thinking::after { background: #ffaa00; box-shadow: 0 0 25px #ffaa00; }
+
+        .jarvis-orb.speaking { border-color: var(--neon-pink); box-shadow: 0 0 45px rgba(255, 42, 109, 0.5); }
+        .jarvis-orb.speaking::after { background: var(--neon-pink); box-shadow: 0 0 35px var(--neon-pink); animation: speakSpike 0.15s linear infinite alternate; }
+
+        #orbLabel { font-size: 8px; font-weight: bold; letter-spacing: 2px; color: var(--neon-blue); z-index: 15; margin-top: 2px; text-shadow: 0 0 4px var(--neon-blue); pointer-events: none; }
 
         /* Tactical Terminal Console Display Deck */
         .display-deck {
             width: 100%; background: var(--panel-bg); border: 1px solid var(--border-glow); border-radius: 4px;
-            padding: 12px; min-height: 95px; max-height: 125px; overflow-y: auto; backdrop-filter: blur(10px);
+            padding: 12px; min-height: 95px; max-height: 125px; overflow-y: auto; backdrop-filter: blur(8px);
             margin-bottom: 12px; box-shadow: inset 0 0 10px rgba(0, 243, 255, 0.05); z-index: 10;
         }
         .terminal-row { font-size: 12px; line-height: 1.5; text-align: center; }
@@ -117,7 +169,7 @@
         .matrix-send-btn { background: rgba(0, 243, 255, 0.06); border: none; border-left: 1px solid rgba(0, 243, 255, 0.25); color: var(--neon-blue); padding: 0 20px; cursor: pointer; font-family: inherit; font-weight: bold; font-size: 11px; }
         .coupling-btn { background: transparent; border: 1px dashed rgba(0, 243, 255, 0.3); color: var(--neon-blue); padding: 10px; font-size: 10px; font-family: inherit; letter-spacing: 2px; text-transform: uppercase; border-radius: 4px; cursor: pointer; text-align: center; }
 
-        /* Sliding Data Log Drawer Overlay */
+        /* Sliding Data Drawer Overlay */
         .memory-drawer {
             position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
             background: rgba(1, 6, 12, 0.99); border-right: 1px solid var(--neon-blue);
@@ -134,35 +186,59 @@
         .log-luna { border-left: 2px solid var(--neon-blue); color: var(--neon-blue); }
         .purge-btn { background: transparent; border: 1px dashed #ff2a6d; color: #ff2a6d; padding: 10px; font-family: inherit; font-size: 10px; border-radius: 4px; cursor: pointer; margin-top: 12px; }
 
-        @keyframes coreSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes blink { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
-        @keyframes coreJitter {
-            0% { transform: translate(0.5px, 0.5px); }
-            50% { transform: translate(-0.5px, -0.5px); }
-            100% { transform: translate(0px, 0.5px); }
+        /* 🎬 ATOMIC QUANTUM KINETIC ENGINES */
+        @keyframes quantumLoop {
+            0% { transform: inherit; }
+            100% { transform: inherit; rotate: 360deg; }
         }
+        @keyframes structureFloat {
+            0%, 100% { transform: translateY(0px) rotateY(-6deg) rotateX(3deg); }
+            50% { transform: translateY(-6px) rotateY(6deg) rotateX(-3deg); }
+        }
+        @keyframes nucleusEnergy {
+            0% { transform: scale(0.92); opacity: 0.7; }
+            100% { transform: scale(1.05); opacity: 1; }
+        }
+        @keyframes speakSpike {
+            0% { transform: scale(0.85); filter: drop-shadow(0 0 5px var(--neon-pink)); }
+            100% { transform: scale(1.2); filter: drop-shadow(0 0 20px var(--neon-pink)); }
+        }
+        @keyframes atomicJitter {
+            0% { transform: translate(0.5px, 0px) scale(0.99); }
+            50% { transform: translate(-0.5px, 0.5px) scale(1.01); }
+            100% { transform: translate(0px, -0.5px) scale(1); }
+        }
+        @keyframes blink { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
     </style>
 </head>
 <body>
 
     <div class="hud-header">
-        <div class="sys-title">LUNA STARDUST CORE V7.6</div>
-        <div class="sys-status"><div class="pulse-dot"></div>NEBULA_STABLE</div>
-        <div class="history-trigger" id="openLogBtn">// SYS_MEMORY_LOGS</div>
+        <div class="sys-title">LUNA MATRIX INTERIOR V6.0</div>
+        <div class="sys-status"><div class="pulse-dot"></div>REACTOR_STABLE</div>
+        <div class="history-trigger" id="openLogBtn">// DATALOG_STREAMS</div>
     </div>
 
     <div id="memoryDrawer" class="memory-drawer">
         <div class="drawer-hud">
-            <span class="drawer-title">STARDUST_DECK_CACHE.LOG</span>
-            <span class="drawer-close" id="closeLogBtn">[TERMINATE]</span>
+            <span class="drawer-title">QUANTUM_DECK_CACHE.LOG</span>
+            <span class="drawer-close" id="closeLogBtn">[DISCONNECT]</span>
         </div>
         <div id="logStream" class="log-stream"></div>
-        <button id="purgeCacheBtn" class="purge-btn">FLUSH PERSISTENT CACHE</button>
+        <button id="purgeCacheBtn" class="purge-btn">FLUSH STACK SEGMENTS</button>
     </div>
 
     <div class="hud-container">
-        <div class="quantum-canvas-frame" id="canvasFrame">
-            <canvas id="particleCanvas"></canvas>
+        <div class="nuclear-stage">
+            <div class="hud-bracket"></div>
+            
+            <div class="electron-orbit orbit-1"></div>
+            <div class="electron-orbit orbit-2"></div>
+            <div class="electron-orbit orbit-3"></div>
+            <div class="electron-orbit orbit-4"></div>
+            <div class="electron-orbit orbit-5"></div>
+            <div class="electron-orbit orbit-6"></div>
+            <div class="electron-orbit orbit-7"></div>
             
             <div id="lunaOrbCore" class="jarvis-orb">
                 <span id="orbLabel">STABLE</span>
@@ -171,15 +247,15 @@
     </div>
 
     <div id="displayDeck" class="display-deck">
-        <div class="terminal-row luna-node">Luna: "Particle ring grid initialized. Multi-axis dust layers active."</div>
+        <div class="terminal-row luna-node">Luna: "Seven axis track synchronization complete. Orbital velocity stabilized at sub-harmonic speeds."</div>
     </div>
 
     <div class="hud-footer">
         <div class="input-bar-container">
-            <input type="text" id="matrixInput" class="matrix-input" placeholder="Inject cloud parameter commands..." autocomplete="off">
+            <input type="text" id="matrixInput" class="matrix-input" placeholder="Inject localized system instruction array..." autocomplete="off">
             <button id="sendBtn" class="matrix-send-btn">TRANSFUSE</button>
         </div>
-        <button id="micBtn" class="coupling-btn">CONNECT AUDIO MATRIX LINK</button>
+        <button id="micBtn" class="coupling-btn">LINK FIELD VOCAL CAPTURE</button>
     </div>
 
     <script>
@@ -201,90 +277,9 @@
         const logStream = document.getElementById('logStream');
         const purgeCacheBtn = document.getElementById('purgeCacheBtn');
 
-        // Canvas Setup Configuration
-        const canvas = document.getElementById('particleCanvas');
-        const ctx = canvas.getContext('2d');
-        const canvasFrame = document.getElementById('canvasFrame');
-        
-        function adaptCanvasBoundaries() {
-            canvas.width = canvasFrame.clientWidth;
-            canvas.height = canvasFrame.clientHeight;
-        }
-        adaptCanvasBoundaries();
-        window.addEventListener('resize', adaptCanvasBoundaries);
-
-        let interactionHistory = JSON.parse(localStorage.getItem('luna_v76_cache')) || [];
+        let interactionHistory = JSON.parse(localStorage.getItem('luna_v60_cache')) || [];
         refreshLogPanel();
 
-        // 🌌 FIXED MULTI-AXIS PARTICLE ENGINE
-        const totalParticlesCount = 1500; 
-        const particleArray = [];
-        let timeOffset = 0;
-
-        const discretePlanes = [
-            { tiltAngle: Math.PI / 4,    speed: 0.005,  dir: 1,  radiusX: 130, radiusY: 45 },  
-            { tiltAngle: -Math.PI / 4,   speed: 0.004,  dir: -1, radiusX: 140, radiusY: 50 },  
-            { tiltAngle: Math.PI / 2,    speed: 0.003,  dir: 1,  radiusX: 125, radiusY: 40 },  
-            { tiltAngle: Math.PI / 25,   speed: 0.002,  dir: -1, radiusX: 150, radiusY: 55 }   
-        ];
-
-        class RingDustParticle {
-            constructor() {
-                this.track = discretePlanes[Math.floor(Math.random() * discretePlanes.length)];
-                this.anglePosition = Math.random() * Math.PI * 2;
-                this.radiusDeviationX = (Math.random() - 0.5) * 15;
-                this.radiusDeviationY = (Math.random() - 0.5) * 10;
-                this.particleSize = 0.5 + Math.random() * 1.2;
-                this.alpha = 0.2 + Math.random() * 0.65;
-            }
-
-            renderUpdate() {
-                this.anglePosition += this.track.speed * this.track.dir;
-                let waveNoise = Math.sin(this.anglePosition * 4 + timeOffset) * 4;
-
-                let localX = Math.cos(this.anglePosition) * (this.track.radiusX + this.radiusDeviationX + waveNoise);
-                let localY = Math.sin(this.anglePosition) * (this.track.radiusY + this.radiusDeviationY + waveNoise);
-
-                let spaceX = localX * Math.cos(this.track.tiltAngle) - localY * Math.sin(this.track.tiltAngle);
-                let spaceY = localX * Math.sin(this.track.tiltAngle) + localY * Math.cos(this.track.tiltAngle);
-
-                let drawTargetX = (canvas.width / 2) + spaceX;
-                let drawTargetY = (canvas.height / 2) + spaceY;
-
-                let activeColor = `rgba(0, 243, 255, ${this.alpha})`; 
-                if (lunaOrbCore.classList.contains('listening')) {
-                    activeColor = `rgba(5, 255, 158, ${this.alpha})`; 
-                } else if (lunaOrbCore.classList.contains('speaking')) {
-                    activeColor = `rgba(255, 42, 109, ${this.alpha})`; 
-                } else if (lunaOrbCore.classList.contains('thinking')) {
-                    activeColor = `rgba(255, 170, 0, ${this.alpha})`; 
-                }
-
-                ctx.beginPath();
-                ctx.arc(drawTargetX, drawTargetY, this.particleSize, 0, Math.PI * 2);
-                ctx.fillStyle = activeColor;
-                ctx.fill();
-            }
-        }
-
-        for (let i = 0; i < totalParticlesCount; i++) {
-            particleArray.push(new RingDustParticle());
-        }
-
-        function runGlobalParticleMatrix() {
-            ctx.fillStyle = 'rgba(2, 8, 19, 0.25)'; 
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            timeOffset += 0.02; 
-            
-            for (let i = 0; i < particleArray.length; i++) {
-                particleArray[i].renderUpdate();
-            }
-            requestAnimationFrame(runGlobalParticleMatrix);
-        }
-        runGlobalParticleMatrix();
-
-
-        // APPLICATION INTELLIGENCE PIPELINE
         openLogBtn.addEventListener('click', () => { refreshLogPanel(); memoryDrawer.classList.add('open'); });
         document.getElementById('closeLogBtn').addEventListener('click', () => memoryDrawer.classList.remove('open'));
         sendBtn.addEventListener('click', processTextTransmission);
@@ -300,7 +295,7 @@
             await broadcastToLunaMatrix(currentString);
         }
 
-        const triggerMicCoupling = () => { if (!speechRecognizer) { alert("Audio module link offline."); return; } speechSynthesizer.cancel(); speechRecognizer.start(); };
+        const triggerMicCoupling = () => { if (!speechRecognizer) { alert("Capture module link offline."); return; } speechSynthesizer.cancel(); speechRecognizer.start(); };
         lunaOrbCore.addEventListener('click', triggerMicCoupling);
         micBtn.addEventListener('click', triggerMicCoupling);
 
@@ -318,7 +313,7 @@
 
         async function broadcastToLunaMatrix(textPayload) {
             lunaOrbCore.className = "jarvis-orb thinking";
-            orbLabel.innerText = "PROCESSING";
+            orbLabel.innerText = "COLLAPSING";
             try {
                 const condensedContext = interactionHistory.slice(-20).map(msg => ({ role: msg.role, content: msg.content }));
                 const matrixResponse = await fetch(RENDER_BACKEND_URL, {
@@ -328,9 +323,7 @@
                 });
 
                 const dataPackage = await matrixResponse.json();
-                const cleanReplyText = dataPackage.choices && dataPackage.choices[0] && dataPackage.choices[0].message
-                    ? dataPackage.choices[0].message.content 
-                    : (dataPackage.luna_text || "[UNSTABLE SYSTEM DATAFEED]");
+                const cleanReplyText = dataPackage.luna_text;
 
                 displayDeck.innerHTML = `<div class="terminal-row user-node">Ayush: "${textPayload}"</div><div class="terminal-row luna-node">Luna: "${cleanReplyText}"</div>`;
                 interactionHistory.push({ role: "assistant", content: cleanReplyText });
@@ -368,16 +361,5 @@
         }
 
         function restoreOrbDefault() { lunaOrbCore.className = "jarvis-orb"; orbLabel.innerText = "STABLE"; }
-        function commitCacheToMemory() { localStorage.setItem('luna_v76_cache', JSON.stringify(interactionHistory)); }
-        function refreshLogPanel() {
-            logStream.innerHTML = interactionHistory.length === 0 
-                ? `<div style="color:rgba(0,243,255,0.15); text-align:center; padding-top:30px; font-size:11px;">LOG SHUTTER EMPTY.</div>`
-                : interactionHistory.map(msg => {
-                    const nodeLabel = msg.role === 'user' ? 'AYUSH' : 'LUNA';
-                    return `<div class="log-card ${msg.role === 'user' ? 'log-user' : 'log-luna'}"><strong>[${nodeLabel}]:</strong> ${msg.content}</div>`;
-                  }).join('');
-            logStream.scrollTop = logStream.scrollHeight;
-        }
-
-        purgeCacheBtn.addEventListener('click', () => {
-            if(confirm("Flush atomic logs?")) { interactionHistory = []; localSt
+        function commitCacheToMemory() { localStorage.setItem('luna_v60_cache', JSON.stringify(interactionHistory)); }
+        function refreshLogPanel() 
