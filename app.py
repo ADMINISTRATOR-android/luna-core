@@ -4,13 +4,12 @@ import soundfile as sf
 import io
 import os
 
-# 1. Point Flask to the 'static' folder where your index.html lives
+# Initialize Flask
 app = Flask(__name__, static_folder='static')
 
-# Initialize pipeline once globally
+# Initialize Kokoro pipeline
 pipeline = KPipeline(lang_code='a') 
 
-# 2. ADD THIS ROUTE to serve your webpage
 @app.route('/')
 def index():
     return send_from_directory('static', 'index.html')
@@ -26,6 +25,7 @@ def synthesize():
 
     generator = pipeline(text, voice=voice, speed=1)
     
+    # Generate audio
     audio_data = None
     for _, _, audio in generator:
         audio_data = audio
@@ -38,6 +38,7 @@ def synthesize():
     return send_file(buf, mimetype='audio/wav')
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
+    # Render uses the PORT environment variable
+    port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
-    
+
