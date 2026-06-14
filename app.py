@@ -1,54 +1,36 @@
-from flask import Flask, request, send_file, send_from_directory
-import io
 import os
+from flask import Flask, request, send_file
+from piper.voice import PiperVoice
 
-# Initialize Flask
-app = Flask(__name__, static_folder='static')
+app = Flask(__name__)
 
-# We declare the variable but do not load the model yet
-pipeline = None
-
-def get_pipeline():
-    global pipeline
-    if pipeline is None:
-        print("Loading Kokoro model into memory...")
-        from kokoro import KPipeline
-        # This will only happen on the first request to /synthesize
-        pipeline = KPipeline(lang_code='a')
-    return pipeline
-
-@app.route('/')
-def index():
-    return send_from_directory('static', 'index.html')
+# Ensure your model files are in the 'model' folder
+MODEL_PATH = "model/en_US-amy-medium.onnx"
+CONFIG_PATH = "model/en_US-amy-medium.onnx.json"
 
 @app.route('/synthesize', methods=['POST'])
 def synthesize():
-    # Model loads only when a user actually requests audio
-    local_pipeline = get_pipeline()
-    
-    data = request.json
-    text = data.get('text', '')
-    voice = data.get('voice', 'af_heart')
+    data = request.get_json()
+    text = data.get("text", "")
     
     if not text:
-        return {"error": "No text provided"}, 400
+        return "No text provided", 400
 
-    generator = local_pipeline(text, voice=voice, speed=1)
+    output_file = "output.wav"
     
-    # Generate audio
-    audio_data = None
-    for _, _, audio in generator:
-        audio_data = audio
-        break
+    # Load the voice engine. 
+    # Because Piper uses ONNX, this is very RAM-friendly.
+    voice = PiperVoice.load(MODEL_PATH, config_path=CONFIG_PATH)
     
-    buf = io.BytesIO()
-    import soundfile as sf
-    sf.write(buf, audio_data, 24000, format='WAV')
-    buf.seek(0)
+    # Synthesize directly to a file
+    with open(output_file, "wb") as f:
+        voice.synthesize(text, f)
     
-    return send_file(buf, mimetype='audio/wav')
+    # Send the file and let Flask handle closing the file
+    return send_file(output_file, mimetype="audio/wav")
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 10000))
+    # Render provides the port via an environment variable
+    port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
     
