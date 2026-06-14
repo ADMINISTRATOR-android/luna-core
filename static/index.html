@@ -20,10 +20,10 @@
             transition: all 0.3s ease;
         }
         .jarvis-orb.speaking { border-color: #ff3366; box-shadow: 0 0 40px rgba(255, 51, 102, 0.5); }
-        .display-panel { width: 100%; max-height: 120px; background: rgba(5, 24, 38, 0.7); border: 1px solid rgba(82, 179, 217, 0.25); padding: 12px; z-index: 5; margin-bottom: 12px; }
+        .display-panel { width: 100%; max-height: 120px; background: rgba(5, 24, 38, 0.7); border: 1px solid rgba(82, 179, 217, 0.25); padding: 12px; z-index: 5; margin-bottom: 12px; overflow-y: auto; }
         .control-deck { width: 100%; display: flex; gap: 10px; z-index: 5; }
         .jarvis-input { flex: 1; background: rgba(5, 24, 38, 0.8); border: 1px solid #52b3d9; color: white; padding: 12px; }
-        .send-btn { padding: 0 20px; cursor: pointer; background: #52b3d9; border: none; }
+        .send-btn { padding: 0 20px; cursor: pointer; background: #52b3d9; border: none; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -43,22 +43,36 @@
     </div>
 
     <script>
-        // LUNA VOCAL ENGINE (Server-Side Integration)
-        async function speak(textToSpeak) {
+        async function lunaTransfuse(userText) {
             const orb = document.getElementById('jarvisOrb');
             const orbText = document.getElementById('orbStateText');
+            const display = document.getElementById('displayPanel');
             
             orb.className = "jarvis-orb speaking";
             orbText.innerText = "THINKING...";
 
             try {
-                const response = await fetch('/synthesize', {
+                // 1. Get AI Text Reply
+                const chatRes = await fetch('/v1/chat/completions', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: textToSpeak })
+                    body: JSON.stringify({
+                        model: "llama-3.3-70b-versatile",
+                        messages: [{ role: "user", content: userText }]
+                    })
+                });
+                const chatData = await chatRes.json();
+                const lunaReply = chatData.luna_text;
+                display.innerText = "Luna: " + lunaReply;
+
+                // 2. Synthesize Audio via unified endpoint
+                const audioRes = await fetch('/tts/synthesize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: lunaReply })
                 });
 
-                const audioBlob = await response.blob();
+                const audioBlob = await audioRes.blob();
                 const player = new Audio(URL.createObjectURL(audioBlob));
                 
                 player.onended = () => { 
@@ -66,19 +80,22 @@
                     orbText.innerText = "TAP TO TALK"; 
                 };
                 player.play();
+                
             } catch (err) {
-                console.error("Vocal Engine Error:", err);
+                console.error("Matrix Link Fault:", err);
+                display.innerText = "ERROR: SYSTEM OFFLINE";
                 orb.className = "jarvis-orb";
                 orbText.innerText = "TAP TO TALK";
             }
         }
 
-        // INPUT HANDLER
         document.getElementById('sendTextBtn').onclick = () => {
             const input = document.getElementById('keyboardInput').value;
-            if (input) speak(input);
+            if (input) {
+                lunaTransfuse(input);
+                document.getElementById('keyboardInput').value = "";
+            }
         };
     </script>
 </body>
 </html>
-
