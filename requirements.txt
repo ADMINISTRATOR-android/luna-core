@@ -1,4 +1,8 @@
+fastapi
+uvicorn[standard]
 flask
 piper-tts
 onnxruntime
+requests
 gunicorn
+asgiref
