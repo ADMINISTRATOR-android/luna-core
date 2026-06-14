@@ -1,5 +1,3 @@
 flask
-kokoro>=0.9.4
-soundfile
-torch
-gunicorn
+piper-tts
+onnxruntime
