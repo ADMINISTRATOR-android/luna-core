@@ -8,6 +8,13 @@ CORS(app)
 
 @app.route('/', methods=['GET'])
 def system_status():
+    # Smart routing: Look for your Luna UI html file first to display the interface
+    for path in ['index.html', 'templates/index.html', 'static/index.html']:
+        if os.path.exists(path):
+            with open(path, 'r', encoding='utf-8') as f:
+                return f.read()
+                
+    # Fallback status if the HTML file isn't found in this directory
     return jsonify({
         "status": "ONLINE",
         "system": "LUNA CORE ENGINE",
@@ -53,7 +60,7 @@ def chat_completions():
 def tts_synthesize():
     try:
         data = request.get_json() or {}
-        text_to_speak = data.get('text', '')
+        text_to_speak = data.get('text', '') or data.get('message', '')
         
         if not text_to_speak:
             return jsonify({"error": "No processing text parameter supplied"}), 400
