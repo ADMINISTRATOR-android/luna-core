@@ -2,61 +2,289 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>LUNA UI | CORE V3.3</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LUNA — STARDUST REGEN MATRIX</title>
     <style>
-        body { background: #02080d; color: #52b3d9; font-family: monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
-        .jarvis-orb { width: 150px; height: 150px; border: 2px dashed #52b3d9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
-        .jarvis-orb.speaking { border-color: #ff3366; box-shadow: 0 0 20px #ff3366; }
-        .display-panel { width: 80%; padding: 20px; background: #051826; border: 1px solid #52b3d9; margin-bottom: 20px; }
-        .control-deck { width: 80%; display: flex; gap: 10px; }
-        input { flex: 1; padding: 10px; background: #051826; border: 1px solid #52b3d9; color: #fff; }
-        button { padding: 10px 20px; background: #52b3d9; border: none; cursor: pointer; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background-color: #01060f;
+            background-image: 
+                linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            color: #52b3d9;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            height: 100vh;
+            padding: 24px;
+            overflow: hidden;
+        }
+
+        /* Top System Log Header */
+        .sys-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            letter-spacing: 2px;
+            border: 1px solid rgba(82, 179, 217, 0.15);
+            padding: 12px 16px;
+            background: rgba(2, 12, 27, 0.7);
+            box-shadow: inset 0 0 15px rgba(0, 243, 255, 0.05);
+        }
+        .sys-status {
+            color: #00f3ff;
+            text-shadow: 0 0 8px rgba(0, 243, 255, 0.5);
+            animation: pulse 2s infinite alternate;
+        }
+
+        /* Holographic Central Core Ring */
+        .core-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .matrix-ring {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            border: 1px dashed rgba(0, 243, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            animation: spin 20s linear infinite;
+        }
+        .matrix-ring-inner {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 243, 255, 0.6);
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.2), inset 0 0 20px rgba(0, 243, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: spin-reverse 10s linear infinite;
+        }
+        .core-state {
+            font-size: 13px;
+            letter-spacing: 3px;
+            color: #00f3ff;
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.8);
+            font-weight: bold;
+            animation: text-pulse 1.5s infinite alternate;
+        }
+
+        /* Dynamic Status States */
+        .matrix-ring.processing { border-color: #ff3366; animation-duration: 4s; }
+        .matrix-ring.processing .matrix-ring-inner { border-color: #ff3366; box-shadow: 0 0 40px rgba(255, 51, 102, 0.4); }
+        .matrix-ring.processing .core-state { color: #ff3366; text-shadow: 0 0 10px rgba(255, 51, 102, 0.8); }
+
+        /* Dialog Display Panel */
+        .display-panel {
+            width: 100%;
+            max-width: 600px;
+            min-height: 110px;
+            background: rgba(2, 12, 27, 0.8);
+            border: 1px solid rgba(82, 179, 217, 0.25);
+            padding: 18px;
+            font-size: 13px;
+            line-height: 1.6;
+            letter-spacing: 1px;
+            color: #7be5ff;
+            margin-bottom: 16px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.5);
+            overflow-y: auto;
+        }
+
+        /* Control Terminals */
+        .control-deck {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        .matrix-input {
+            flex: 1;
+            background: rgba(1, 10, 22, 0.9);
+            border: 1px solid rgba(82, 179, 217, 0.4);
+            border-radius: 2px;
+            color: #ffffff;
+            padding: 14px 16px;
+            font-family: monospace;
+            font-size: 13px;
+            letter-spacing: 1px;
+            outline: none;
+            transition: border 0.3s ease;
+        }
+        .matrix-input:focus {
+            border-color: #00f3ff;
+            box-shadow: 0 0 12px rgba(0, 243, 255, 0.15);
+        }
+        .matrix-input::placeholder {
+            color: rgba(82, 179, 217, 0.4);
+        }
+        .transfuse-btn {
+            background: rgba(2, 24, 43, 0.8);
+            border: 1px solid #52b3d9;
+            color: #52b3d9;
+            padding: 0 28px;
+            font-weight: bold;
+            font-family: monospace;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .transfuse-btn:hover {
+            background: #52b3d9;
+            color: #01060f;
+            box-shadow: 0 0 15px rgba(82, 179, 217, 0.4);
+        }
+
+        /* Bottom Functional link */
+        .matrix-link-btn {
+            width: 100%;
+            max-width: 600px;
+            background: transparent;
+            border: 1px dashed rgba(82, 179, 217, 0.3);
+            color: #52b3d9;
+            padding: 12px;
+            font-size: 11px;
+            letter-spacing: 3px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .matrix-link-btn:hover {
+            border-color: #00f3ff;
+            color: #00f3ff;
+            background: rgba(0, 243, 255, 0.02);
+        }
+
+        /* Animations */
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes spin-reverse { to { transform: rotate(-360deg); } }
+        @keyframes pulse { from { opacity: 0.6; } to { opacity: 1; } }
+        @keyframes text-pulse { from { opacity: 0.8; text-shadow: 0 0 4px rgba(0,243,255,0.4); } to { opacity: 1; text-shadow: 0 0 12px rgba(0,243,255,0.9); } }
     </style>
 </head>
 <body>
-    <div id="jarvisOrb" class="jarvis-orb"><span id="orbState">READY</span></div>
-    <div id="displayPanel" class="display-panel">LUNA SYSTEM ONLINE</div>
-    <div class="control-deck">
-        <input type="text" id="keyboardInput" placeholder="Transmit directive...">
-        <button id="sendTextBtn">SEND</button>
+
+    <div class="sys-header">
+        <div>LUNA STARDUST CORE V6.5</div>
+        <div class="sys-status">● NEBULA_STABLE</div>
+        <div>// SYS_MEMORY_LOGS</div>
     </div>
 
+    <div class="core-container">
+        <div id="ringContainer" class="matrix-ring">
+            <div class="matrix-ring-inner">
+                <div id="coreStatusText" class="core-state">STABLE</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="displayPanel" class="display-panel">
+        Luna: "Particle cloud generation complete, Ayush. Solid tracks dematerialized into stardust vectors."
+    </div>
+
+    <div class="control-deck">
+        <input type="text" id="keyboardInput" class="matrix-input" placeholder="Inject cloud parameter comm" autocomplete="off">
+        <button id="sendTextBtn" class="transfuse-btn">TRANSFUSE</button>
+    </div>
+
+    <button id="audioMatrixBtn" class="matrix-link-btn">CONNECT AUDIO MATRIX LINK</button>
+
     <script>
-        async function lunaTransfuse() {
-            const input = document.getElementById('keyboardInput');
-            const orb = document.getElementById('jarvisOrb');
-            const display = document.getElementById('displayPanel');
-            const text = input.value;
-            if (!text) return;
+        let audioContextInitialized = false;
 
-            orb.className = "jarvis-orb speaking";
-            input.value = "";
-            
-            try {
-                // Step 1: Chat
-                const chat = await fetch('/v1/chat/completions', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ messages: [{role: "user", content: text}] })
-                });
-                const chatData = await chat.json();
-                display.innerText = chatData.luna_text;
-
-                // Step 2: Voice
-                const audio = await fetch('/tts/synthesize', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: chatData.luna_text })
-                });
-                const blob = await audio.blob();
-                const player = new Audio(URL.createObjectURL(blob));
-                player.onended = () => orb.className = "jarvis-orb";
-                player.play();
-            } catch (e) { display.innerText = "Error: " + e; }
+        async function initAudioMatrix() {
+            if (!audioContextInitialized) {
+                // Pre-activates browser security requirements for immediate audio synthesis playback
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) {
+                    const ctx = new AudioContext();
+                    audioContextInitialized = true;
+                    document.getElementById('audioMatrixBtn').innerText = "AUDIO MATRIX LINK ACTIVE";
+                    document.getElementById('audioMatrixBtn').style.borderColor = "#00f3ff";
+                    document.getElementById('audioMatrixBtn').style.color = "#00f3ff";
+                }
+            }
         }
 
-        document.getElementById('sendTextBtn').onclick = lunaTransfuse;
-        document.getElementById('keyboardInput').onkeypress = (e) => { if(e.key === 'Enter') lunaTransfuse(); };
+        async function runMatrixTransfusion() {
+            const inputElement = document.getElementById('keyboardInput');
+            const userText = inputElement.value.trim();
+            const ring = document.getElementById('ringContainer');
+            const coreText = document.getElementById('coreStatusText');
+            const consoleDisplay = document.getElementById('displayPanel');
+
+            if (!userText) return;
+
+            // Trigger visual processing states
+            ring.classList.add('processing');
+            coreText.innerText = "THINKING";
+            inputElement.value = ""; 
+
+            try {
+                // Phase 1: Contact API Backend Node
+                const chatResponse = await fetch('/v1/chat/completions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ messages: [{ role: "user", content: userText }] })
+                });
+                
+                const chatData = await chatResponse.json();
+                const lunaReply = chatData.luna_text;
+                
+                // Print directly to console logs
+                consoleDisplay.innerText = "Luna: \"" + lunaReply + "\"";
+                coreText.innerText = "VOCALIZING";
+
+                // Phase 2: Transfuse Generated Matrix Streams to Audio Engine
+                const audioResponse = await fetch('/tts/synthesize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: lunaReply })
+                });
+
+                const audioBlob = await audioResponse.blob();
+                const matrixAudioPlayer = new Audio(URL.createObjectURL(audioBlob));
+                
+                matrixAudioPlayer.onended = () => { 
+                    ring.classList.remove('processing'); 
+                    coreText.innerText = "STABLE"; 
+                };
+                
+                await matrixAudioPlayer.play();
+
+            } catch (matrixException) {
+                console.error("Matrix link operational fault:", matrixException);
+                consoleDisplay.innerText = "CRITICAL FAULT: CONNECTION VECTOR DROPPED";
+                ring.classList.remove('processing');
+                coreText.innerText = "ERROR";
+            }
+        }
+
+        // Attach action handlers directly to UI bindings
+        document.getElementById('sendTextBtn').onclick = runMatrixTransfusion;
+        document.getElementById('audioMatrixBtn').onclick = initAudioMatrix;
+        
+        document.getElementById('keyboardInput').onkeypress = function(e) { 
+            if (e.key === 'Enter') {
+                runMatrixTransfuse(); 
+            }
+        };
     </script>
 </body>
 </html>
