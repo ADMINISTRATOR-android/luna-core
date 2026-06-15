@@ -38,8 +38,9 @@ def chat_completions():
             "Content-Type": "application/json"
         }
         
+        # FIXED: Swapped out the decommissioned llama3-8b-8192 for the active model
         payload = {
-            "model": "llama3-8b-8192",
+            "model": "llama-3.1-8b-instant",
             "messages": user_messages,
             "temperature": 0.7
         }
