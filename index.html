@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Luna UI Core</title>
+    <title>Luna UI Matrix</title>
     <style>
         * {
             box-sizing: border-box;
@@ -13,9 +13,9 @@
         body {
             background-color: #01060f;
             background-image: 
-                linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
-            background-size: 30px 30px;
+                linear-gradient(rgba(0, 243, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 243, 255, 0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
             color: #52b3d9;
             font-family: 'Courier New', Courier, monospace;
             display: flex;
@@ -23,19 +23,20 @@
             align-items: center;
             min-height: 100vh;
             padding: 16px;
-            overflow-y: auto;
+            overflow: hidden;
         }
         .sys-header {
             width: 100%;
             max-width: 450px;
             border: 1px solid rgba(0, 243, 255, 0.2);
-            background: rgba(1, 10, 25, 0.8);
+            background: rgba(1, 10, 25, 0.85);
             padding: 12px;
-            margin-bottom: 16px;
+            margin-bottom: 10px;
             font-size: 11px;
             letter-spacing: 2px;
             display: flex;
             justify-content: space-between;
+            z-index: 10;
         }
         .status-dot {
             width: 8px;
@@ -46,67 +47,112 @@
             box-shadow: 0 0 8px #00f3ff;
         }
         .core-container {
+            position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             flex: 1;
             width: 100%;
-            margin-bottom: 16px;
+            max-width: 500px;
         }
+        /* Particle Field Canvas Alignment */
+        #particleCanvas {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            max-height: 380px;
+            pointer-events: none;
+            z-index: 1;
+        }
+        /* HUD Core Center Rings Assembly */
         .matrix-ring {
-            width: 170px;
-            height: 170px;
-            border: 2px dashed #00f3ff;
-            border-radius: 50%;
+            width: 180px;
+            height: 180px;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
-            box-shadow: inset 0 0 20px rgba(0, 243, 255, 0.1), 0 0 20px rgba(0, 243, 255, 0.1);
             cursor: pointer;
-            transition: all 0.3s ease;
-            animation: rotate 25s linear infinite;
+            z-index: 5;
+            border-radius: 50%;
         }
-        .matrix-ring.listening {
-            border-color: #bd93f9;
-            box-shadow: inset 0 0 30px rgba(189, 147, 249, 0.4), 0 0 30px rgba(189, 147, 249, 0.4);
-            animation: rotate 5s linear infinite, pulse 1.5s infinite alternate;
+        /* Outer Gear Line */
+        .ring-outer-hud {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 2px dashed rgba(0, 243, 255, 0.4);
+            border-radius: 50%;
+            animation: rotateClockwise 35s linear infinite;
         }
+        /* Inner Counter-Rotating Bracket Ring */
+        .ring-inner-hud {
+            position: absolute;
+            width: 82%;
+            height: 82%;
+            border: 2px dotted rgba(0, 243, 255, 0.6);
+            border-top: 3px solid #00f3ff;
+            border-bottom: 3px solid #00f3ff;
+            border-radius: 50%;
+            animation: rotateCounterClockwise 12s linear infinite;
+        }
+        /* Core Center Capsule */
+        .ring-core-solid {
+            position: absolute;
+            width: 64%;
+            height: 64%;
+            background: radial-gradient(circle, rgba(1,15,35,0.95) 0%, rgba(1,6,15,1) 100%);
+            border: 2px solid #00f3ff;
+            border-radius: 50%;
+            box-shadow: inset 0 0 15px rgba(0, 243, 255, 0.4), 0 0 15px rgba(0, 243, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        /* Locked Level Text */
         .ring-text {
             font-weight: bold;
-            letter-spacing: 3px;
+            font-size: 14px;
+            letter-spacing: 2px;
             color: #00f3ff;
-            text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
-            transform: rotate(-90deg);
-            animation: unrotate 25s linear infinite;
-            pointer-events: none;
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.8);
+            text-align: center;
+            user-select: none;
         }
-        .matrix-ring.listening .ring-text {
-            color: #bd93f9;
-            text-shadow: 0 0 10px rgba(189, 147, 249, 0.8);
-            animation: unrotate 5s linear infinite;
-        }
+        /* Reactive CSS Changes via JavaScript States */
+        .matrix-ring.listening .ring-outer-hud { border-color: rgba(189, 147, 249, 0.5); animation-duration: 10s; }
+        .matrix-ring.listening .ring-inner-hud { border-color: #bd93f9; border-top-color: #fff; border-bottom-color: #fff; }
+        .matrix-ring.listening .ring-core-solid { border-color: #bd93f9; box-shadow: inset 0 0 20px rgba(189, 147, 249, 0.6); }
+        .matrix-ring.listening .ring-text { color: #bd93f9; text-shadow: 0 0 10px #bd93f9; }
+
         .display-panel {
             width: 100%;
             max-width: 450px;
             border: 1px solid rgba(0, 243, 255, 0.2);
-            background: rgba(1, 10, 25, 0.8);
-            padding: 16px;
-            min-height: 90px;
-            font-size: 13px;
+            background: rgba(1, 10, 25, 0.85);
+            padding: 14px;
+            min-height: 85px;
+            max-height: 110px;
+            overflow-y: auto;
+            font-size: 12px;
             line-height: 1.5;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             border-radius: 2px;
             color: #7be5ff;
+            z-index: 10;
         }
         .deck-wrapper {
             width: 100%;
             max-width: 450px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
             margin-top: auto;
+            z-index: 10;
         }
         .control-deck {
             display: flex;
@@ -153,26 +199,31 @@
             color: #00f3ff;
             text-shadow: 0 0 8px #00f3ff;
         }
-        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes unrotate { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
-        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.04); } }
+        @keyframes rotateClockwise { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes rotateCounterClockwise { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
     </style>
 </head>
 <body>
 
     <div class="sys-header">
-        <div>LUNA STARDUST CORE V6.5</div>
-        <div><span class="status-dot"></span> NEBULA_STABLE</div>
+        <div>LUNA MATRIX PLATFORM V6.5</div>
+        <div><span class="status-dot" id="sysDot"></span> NEBULA_CORE</div>
     </div>
 
     <div class="core-container">
+        <canvas id="particleCanvas"></canvas>
+        
         <div id="ringButton" class="matrix-ring">
-            <div class="ring-text" id="statusRing">READY</div>
+            <div class="ring-outer-hud"></div>
+            <div class="ring-inner-hud"></div>
+            <div class="ring-core-solid">
+                <div class="ring-text" id="statusRing">READY</div>
+            </div>
         </div>
     </div>
 
     <div class="display-panel" id="consoleOutput">
-        Luna System Online. Tap the Audio Matrix button below first, then tap the Center Ring to speak, or use the keyboard.
+        Stardust core online. Arm 'CONNECT AUDIO MATRIX LINK' first, then tap the HUD core or type below.
     </div>
 
     <div class="deck-wrapper">
@@ -191,11 +242,93 @@
         const keyboardInput = document.getElementById('keyboardInput');
         const consoleOutput = document.getElementById('consoleOutput');
         const statusRing = document.getElementById('statusRing');
+        const sysDot = document.getElementById('sysDot');
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
 
         let audioUnlocked = false;
         let recognition = null;
+        let safetyTimeout = null;
+        let currentStatus = "READY"; // READY, LISTENING, THINKING, SPEAKING, ERROR
 
-        // Initialize Speech Recognition API
+        // --- CANVAS PARTICLE WAVE ENGINE SYSTEM ---
+        let particles = [];
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = Math.min(canvas.parentElement.clientHeight, 380);
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.angle = Math.random() * Math.PI * 2;
+                this.radius = 80 + Math.random() * 40;
+                this.x = canvas.width / 2 + Math.cos(this.angle) * this.radius;
+                this.y = canvas.height / 2 + Math.sin(this.angle) * this.radius;
+                this.size = Math.random() * 2 + 0.5;
+                this.speed = 0.005 + Math.random() * 0.01;
+                this.waveSpeed = Math.random() * 0.05;
+                this.waveRange = 2 + Math.random() * 5;
+                this.life = Math.random();
+            }
+            update() {
+                this.angle += this.speed * (currentStatus === "THINKING" ? 4 : currentStatus === "LISTENING" ? 1.5 : 1);
+                
+                let dynamicRadius = this.radius;
+                if (currentStatus === "LISTENING") {
+                    dynamicRadius += Math.sin(Date.now() * 0.01 + this.angle) * 12;
+                } else if (currentStatus === "SPEAKING") {
+                    dynamicRadius += Math.sin(Date.now() * 0.02 + this.angle) * (this.waveRange * 3);
+                } else if (currentStatus === "THINKING") {
+                    this.radius -= 0.4;
+                    if(this.radius < 10) this.reset();
+                    dynamicRadius = this.radius;
+                } else {
+                    dynamicRadius += Math.sin(Date.now() * 0.002 + this.angle * 4) * this.waveRange;
+                }
+
+                this.x = canvas.width / 2 + Math.cos(this.angle) * dynamicRadius;
+                this.y = canvas.height / 2 + Math.sin(this.angle) * dynamicRadius;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                if (currentStatus === "LISTENING") {
+                    ctx.fillStyle = `rgba(189, 147, 249, ${0.4 + Math.random() * 0.6})`;
+                } else if (currentStatus === "THINKING") {
+                    ctx.fillStyle = `rgba(0, 243, 255, ${0.3 + Math.random() * 0.7})`;
+                } else if (currentStatus === "SPEAKING") {
+                    ctx.fillStyle = `rgba(123, 229, 255, ${0.5 + Math.random() * 0.5})`;
+                } else if (currentStatus === "ERROR") {
+                    ctx.fillStyle = `rgba(255, 85, 85, ${0.5 + Math.random() * 0.5})`;
+                } else {
+                    ctx.fillStyle = `rgba(0, 243, 255, ${0.2 + Math.random() * 0.5})`;
+                }
+                ctx.fill();
+            }
+        }
+
+        // Initialize particle array
+        for (let i = 0; i < 160; i++) {
+            particles.push(new Particle());
+        }
+
+        function animateMatrixParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateMatrixParticles);
+        }
+        animateMatrixParticles();
+        // ------------------------------------------
+
+        // Establish Speech Matrix Node
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (SpeechRecognition) {
             recognition = new SpeechRecognition();
@@ -204,27 +337,63 @@
             recognition.lang = 'en-US';
 
             recognition.onstart = () => {
-                ringButton.classList.add('listening');
-                statusRing.innerText = "LISTENING";
-                consoleOutput.innerText = "Listening to your voice command...";
+                updateCoreState("LISTENING");
+                consoleOutput.innerText = "Listening to voice stream parameter...";
+                
+                clearTimeout(safetyTimeout);
+                safetyTimeout = setTimeout(() => {
+                    if (currentStatus === "LISTENING") {
+                        recognition.stop();
+                        cleanReset("Voice field cycle timed out.");
+                    }
+                }, 7000);
             };
 
             recognition.onerror = (e) => {
-                console.error(e);
-                ringButton.classList.remove('listening');
-                statusRing.innerText = "READY";
-                consoleOutput.innerText = "Voice matching timed out or rejected.";
+                clearTimeout(safetyTimeout);
+                cleanReset("Audio trace dropped.");
+            };
+
+            recognition.onend = () => {
+                clearTimeout(safetyTimeout);
+                if (currentStatus === "LISTENING") {
+                    cleanReset("Ready.");
+                }
             };
 
             recognition.onresult = (event) => {
-                ringButton.classList.remove('listening');
-                const voiceText = event.results[0][0].transcript;
-                consoleOutput.innerText = `Captured: "${voiceText}"`;
-                transmitDirective(voiceText);
+                clearTimeout(safetyTimeout);
+                const voiceResultText = event.results[0][0].transcript;
+                consoleOutput.innerText = `Captured Directive: "${voiceResultText}"`;
+                transmitDirective(voiceResultText);
             };
         }
 
-        // Arm Audio System
+        function updateCoreState(state) {
+            currentStatus = state;
+            statusRing.innerText = state;
+            if(state === "LISTENING") {
+                ringButton.classList.add('listening');
+                sysDot.style.backgroundColor = "#bd93f9";
+                sysDot.style.boxShadow = "0 0 8px #bd93f9";
+            } else {
+                ringButton.classList.remove('listening');
+                if (state === "ERROR") {
+                    sysDot.style.backgroundColor = "#ff5555";
+                    sysDot.style.boxShadow = "0 0 8px #ff5555";
+                } else {
+                    sysDot.style.backgroundColor = "#00f3ff";
+                    sysDot.style.boxShadow = "0 0 8px #00f3ff";
+                }
+            }
+        }
+
+        function cleanReset(msg) {
+            updateCoreState("READY");
+            consoleOutput.innerText = msg;
+            particles.forEach(p => p.radius = 80 + Math.random() * 40);
+        }
+
         audioMatrixBtn.addEventListener('click', () => {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             if (AudioContext) {
@@ -232,38 +401,35 @@
                 audioUnlocked = true;
                 audioMatrixBtn.classList.add('active');
                 audioMatrixBtn.innerText = "AUDIO MATRIX LINK ACTIVE";
-                consoleOutput.innerText = "System arming sequence complete. Center ring microphone initialized.";
+                consoleOutput.innerText = "Audio links active. Tap HUD core to execute vocal capture array.";
             }
         });
 
-        // Trigger Speech Recognition on Center Ring Tap
         ringButton.addEventListener('click', () => {
             if (!audioUnlocked) {
-                consoleOutput.innerText = "ERROR: You must click 'CONNECT AUDIO MATRIX LINK' first!";
+                consoleOutput.innerText = "CRITICAL FAULT: Arm 'CONNECT AUDIO MATRIX LINK' first!";
                 return;
             }
-            if (statusRing.innerText === "THINKING" || statusRing.innerText === "SPEAKING") return;
+            if (currentStatus === "THINKING" || currentStatus === "SPEAKING") return;
             
             if (recognition) {
-                if (ringButton.classList.contains('listening')) {
+                if (currentStatus === "LISTENING") {
                     recognition.stop();
                 } else {
                     recognition.start();
                 }
             } else {
-                consoleOutput.innerText = "Speech recognition matrix not supported on this specific device browser.";
+                consoleOutput.innerText = "Native Speech recognition interface unavailable on this hardware.";
             }
         });
 
-        // Core Communication Execution Link
         async function transmitDirective(forcedText = null) {
             const userText = forcedText ? forcedText.trim() : keyboardInput.value.trim();
             if (!userText) return;
 
             if (!forcedText) keyboardInput.value = ""; 
-
-            statusRing.innerText = "THINKING";
-            consoleOutput.innerText = "Processing vector data via Groq...";
+            updateCoreState("THINKING");
+            consoleOutput.innerText = "Streaming request parameters to Groq node...";
 
             try {
                 const chatResponse = await fetch('/v1/chat/completions', {
@@ -277,7 +443,7 @@
                 
                 const lunaReply = chatData.luna_text || chatData.choices[0].message.content;
                 consoleOutput.innerText = "Luna: " + lunaReply;
-                statusRing.innerText = "SPEAKING";
+                updateCoreState("SPEAKING");
 
                 const audioResponse = await fetch('/tts/synthesize', {
                     method: 'POST',
@@ -287,26 +453,22 @@
 
                 if (!audioResponse.ok) {
                     const audioErrData = await audioResponse.json().catch(() => ({}));
-                    throw new Error(audioErrData.error || "Cartesia audio engine dropped validation.");
+                    throw new Error(audioErrData.error || "Cartesia synthesis node rejected data.");
                 }
 
                 const audioBlob = await audioResponse.blob();
                 const matrixAudioPlayer = new Audio(URL.createObjectURL(audioBlob));
                 
-                matrixAudioPlayer.onended = () => { 
-                    statusRing.innerText = "READY"; 
-                };
-                
+                matrixAudioPlayer.onended = () => { cleanReset("Ready."); };
                 await matrixAudioPlayer.play();
 
             } catch (matrixException) {
                 console.error(matrixException);
+                updateCoreState("ERROR");
                 consoleOutput.innerText = "SYSTEM FAULT: " + matrixException.message;
-                statusRing.innerText = "ERROR";
             }
         }
 
-        // Keyboard Action Link
         sendTextBtn.addEventListener('click', () => transmitDirective());
         keyboardInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') transmitDirective();
