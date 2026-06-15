@@ -1,8 +1,4 @@
 fastapi
-uvicorn[standard]
-flask
-piper-tts
-onnxruntime
+uvicorn
 requests
-gunicorn
-asgiref
+pydantic
