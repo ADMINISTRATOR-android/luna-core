@@ -38,7 +38,7 @@ def chat_completions():
             "Content-Type": "application/json"
         }
         
-        # FIXED: Swapped out the decommissioned llama3-8b-8192 for the active model
+        # Swapped out the decommissioned llama3-8b-8192 for the active model
         payload = {
             "model": "llama-3.1-8b-instant",
             "messages": user_messages,
@@ -77,13 +77,15 @@ def tts_synthesize():
             "Content-Type": "application/json"
         }
         
+        # FIXED: Swapped out deprecated "sonic-english" for "sonic-latest" and added explicit language field
         payload = {
-            "model_id": "sonic-english",
+            "model_id": "sonic-latest",
             "transcript": text_to_speak,
             "voice": {
                 "mode": "id",
                 "id": "248be419-c216-434c-960d-29f00a13b97a"
             },
+            "language": "en",
             "output_format": {
                 "container": "mp3",
                 "sample_rate": 44100
