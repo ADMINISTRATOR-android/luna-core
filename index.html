@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LUNA UI | CORE V3.3</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: #02080d; color: #52b3d9; font-family: 'Courier New', Courier, monospace;
+            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            height: 100vh; overflow: hidden; padding: 20px;
+        }
+        #swarmCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+        .orb-container { flex: 1; display: flex; align-items: center; justify-content: center; z-index: 5; }
+        .jarvis-orb {
+            width: 200px; height: 200px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(2,15,26,0.8) 0%, rgba(5,42,69,0.2) 60%);
+            border: 2px dashed rgba(82, 179, 217, 0.4); display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .jarvis-orb.speaking { border-color: #ff3366; box-shadow: 0 0 40px rgba(255, 51, 102, 0.5); }
+        .display-panel { width: 100%; max-height: 120px; background: rgba(5, 24, 38, 0.7); border: 1px solid rgba(82, 179, 217, 0.25); padding: 12px; z-index: 5; margin-bottom: 12px; overflow-y: auto; }
+        .control-deck { width: 100%; display: flex; gap: 10px; z-index: 5; }
+        .jarvis-input { flex: 1; background: rgba(5, 24, 38, 0.8); border: 1px solid #52b3d9; color: white; padding: 12px; }
+        .send-btn { padding: 0 20px; cursor: pointer; background: #52b3d9; border: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <canvas id="swarmCanvas"></canvas>
+
+    <div class="orb-container">
+        <div id="jarvisOrb" class="jarvis-orb">
+            <span id="orbStateText">TAP TO TALK</span>
+        </div>
+    </div>
+
+    <div id="displayPanel" class="display-panel">LUNA SYSTEM READY</div>
+
+    <div class="control-deck">
+        <input type="text" id="keyboardInput" class="jarvis-input" placeholder="Transmit directive...">
+        <button id="sendTextBtn" class="send-btn">SEND</button>
+    </div>
+
+    <script>
+        async function lunaTransfuse(userText) {
+            const orb = document.getElementById('jarvisOrb');
+            const orbText = document.getElementById('orbStateText');
+            const display = document.getElementById('displayPanel');
+            
+            orb.className = "jarvis-orb speaking";
+            orbText.innerText = "THINKING...";
+
+            try {
+                // 1. Get AI Text Reply
+                const chatRes = await fetch('/v1/chat/completions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: "llama-3.3-70b-versatile",
+                        messages: [{ role: "user", content: userText }]
+                    })
+                });
+                const chatData = await chatRes.json();
+                const lunaReply = chatData.luna_text;
+                display.innerText = "Luna: " + lunaReply;
+
+                // 2. Synthesize Audio via unified endpoint
+                const audioRes = await fetch('/tts/synthesize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: lunaReply })
+                });
+
+                const audioBlob = await audioRes.blob();
+                const player = new Audio(URL.createObjectURL(audioBlob));
+                
+                player.onended = () => { 
+                    orb.className = "jarvis-orb"; 
+                    orbText.innerText = "TAP TO TALK"; 
+                };
+                player.play();
+                
+            } catch (err) {
+                console.error("Matrix Link Fault:", err);
+                display.innerText = "ERROR: SYSTEM OFFLINE";
+                orb.className = "jarvis-orb";
+                orbText.innerText = "TAP TO TALK";
+            }
+        }
+
+        document.getElementById('sendTextBtn').onclick = () => {
+            const input = document.getElementById('keyboardInput').value;
+            if (input) {
+                lunaTransfuse(input);
+                document.getElementById('keyboardInput').value = "";
+            }
+        };
+    </script>
+</body>
+</html>
