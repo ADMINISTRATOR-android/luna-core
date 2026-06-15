@@ -8,6 +8,19 @@ app = Flask(__name__)
 CORS(app)
 
 # =====================================================================
+# 0. ROOT SYSTEM STATUS ENDPOINT (Fixes the browser "Not Found" error)
+# =====================================================================
+@app.route('/', methods=['GET'])
+def system_status():
+    return jsonify({
+        "status": "ONLINE",
+        "system": "LUNA CORE ENGINE",
+        "version": "v6.5",
+        "connection": "Nebula stable path active"
+    }), 200
+
+
+# =====================================================================
 # 1. GROQ CHAT COMPLETION ENDPOINT
 # =====================================================================
 @app.route('/v1/chat/completions', methods=['POST'])
@@ -101,7 +114,5 @@ def tts_synthesize():
 # 3. PRODUCTION ENVIRONMENT INVOCATION
 # =====================================================================
 if __name__ == '__main__':
-    # Bind to 0.0.0.0 and dynamically pull Render's assigned port variable
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port, debug=False)
-    
