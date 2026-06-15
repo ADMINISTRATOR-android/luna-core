@@ -1,86 +1,107 @@
 import os
 import requests
-import io
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
-from pydantic import BaseModel
+from flask import Flask, request, jsonify, Response
+from flask_cors import CORS
 
-app = FastAPI(title="Luna Core Matrix - Cartesia Sonic Edition")
+app = Flask(__name__)
+# Enable CORS so your frontend can communicate with this backend seamlessly
+CORS(app)
 
-GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "").strip()
-CARTESIA_API_KEY = os.environ.get("CARTESIA_API_KEY", "").strip()
-
-# Cartesia Configurations
-CARTESIA_MODEL = "sonic-english"
-# A crystal-clear, premium cybernetic female voice profile
-CARTESIA_VOICE_ID = "694f9389-faee-4321-b3fb-ee0b47f6f695" 
-
-class ChatRequest(BaseModel):
-    messages: list
-
-@app.get("/", response_class=HTMLResponse)
-async def serve_ui():
+# =====================================================================
+# 1. GROQ CHAT COMPLETION ENDPOINT
+# =====================================================================
+@app.route('/v1/chat/completions', methods=['POST'])
+def chat_completions():
     try:
-        with open("index.html", "r", encoding="utf-8") as f:
-            return f.read()
-    except FileNotFoundError:
-        return "<h1>Critical Error: index.html missing from root directory!</h1>"
+        data = request.get_json() or {}
+        user_messages = data.get('messages', [])
 
-@app.post("/v1/chat/completions")
-async def chat(req: ChatRequest):
-    if not GROQ_API_KEY:
-        return JSONResponse(status_code=400, content={"error": "GROQ_API_KEY is missing from Render environment variables."})
-    
-    try:
-        api_messages = [{"role": "system", "content": "You are Luna. Keep replies short and human."}] + req.messages
-        res = requests.post(
-            "https://api.groq.com/openai/v1/chat/completions",
-            json={"model": "llama-3.3-70b-versatile", "messages": api_messages},
-            headers={"Authorization": f"Bearer {GROQ_API_KEY}"},
-            timeout=10
-        )
-        res_data = res.json()
-        return JSONResponse(content={"luna_text": res_data["choices"][0]["message"]["content"]})
-    except Exception as e:
-        return JSONResponse(status_code=500, content={"error": f"Groq Gateway Error: {str(e)}"})
+        groq_api_key = os.environ.get("GROQ_API_KEY")
+        if not groq_api_key:
+            return jsonify({"error": "Backend configuration missing GROQ_API_KEY"}), 500
 
-@app.post("/tts/synthesize")
-async def synthesize(data: dict):
-    text = data.get("text", "").strip()
-    if not text:
-        return JSONResponse(status_code=400, content={"error": "No directive coordinates provided for vocalization."})
-    if not CARTESIA_API_KEY:
-        return JSONResponse(status_code=400, content={"error": "CARTESIA_API_KEY is missing from Render environment variables."})
-
-    try:
-        response = requests.post(
-            "https://api.cartesia.ai/tts/bytes",
-            headers={
-                "X-API-Key": CARTESIA_API_KEY,
-                "Cartesia-Version": "2024-06-10",
-                "Content-Type": "application/json"
-            },
-            json={
-                "model_id": CARTESIA_MODEL,
-                "transcript": text,
-                "voice": {
-                    "mode": "id",
-                    "id": CARTESIA_VOICE_ID
-                },
-                "output_format": {
-                    "container": "wav",
-                    "encoding": "linear16",
-                    "sample_rate": 24000
-                }
-            },
-            timeout=10
-        )
-
-        if response.status_code != 200:
-            return JSONResponse(status_code=response.status_code, content={"error": "Cartesia matrix initialization rejected."})
-
-        return StreamingResponse(io.BytesIO(response.content), media_type="audio/wav")
-
-    except Exception as e:
-        return JSONResponse(status_code=500, content={"error": f"Matrix Streaming Failure: {str(e)}"})
+        # Gateway to Groq Upstream Cloud
+        url = "https://api.groq.com/openai/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {groq_api_key}",
+            "Content-Type": "application/json"
+        }
         
+        payload = {
+            "model": "llama3-8b-8192", # Optimized high-speed model for real-time UI interactions
+            "messages": user_messages,
+            "temperature": 0.7
+        }
+
+        response = requests.post(url, headers=headers, json=payload)
+        
+        if response.status_code != 200:
+            print(f"[GROQ ERROR LOG]: {response.text}")
+            return jsonify({"error": f"Groq upstream responded with status {response.status_code}"}), response.status_code
+
+        return jsonify(response.json())
+
+    except Exception as e:
+        print(f"[SYSTEM FAULT]: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+# =====================================================================
+# 2. CARTESIA VOICE SYNTHESIS ENDPOINT
+# =====================================================================
+@app.route('/tts/synthesize', methods=['POST'])
+def tts_synthesize():
+    try:
+        data = request.get_json() or {}
+        text_to_speak = data.get('text', '')
+        
+        if not text_to_speak:
+            return jsonify({"error": "No processing text parameter supplied"}), 400
+
+        cartesia_api_key = os.environ.get("CARTESIA_API_KEY")
+        if not cartesia_api_key:
+            return jsonify({"error": "Backend configuration missing CARTESIA_API_KEY"}), 500
+
+        # Build Cartesia payload architecture
+        url = "https://api.cartesia.ai/tts/bytes"
+        headers = {
+            "X-API-Key": cartesia_api_key,
+            "Cartesia-Version": "2024-06-10",
+            "Content-Type": "application/json"
+        }
+        
+        payload = {
+            "model_id": "sonic-english",
+            "transcript": text_to_speak,
+            "voice": {
+                "mode": "id",
+                "id": "248be419-c216-434c-960d-29f00a13b97a" # Verified Sonic Blue Male voice
+            },
+            "output_format": {
+                "container": "mp3",
+                "sample_rate": 44100
+            }
+        }
+
+        response = requests.post(url, headers=headers, json=payload)
+        
+        if response.status_code != 200:
+            print(f"[CARTESIA ERROR LOG]: {response.text}")
+            return jsonify({"error": f"Cartesia upstream error status: {response.status_code}"}), response.status_code
+
+        # Return pure binary audio data back to your frontend
+        return Response(response.content, mimetype="audio/mpeg")
+
+    except Exception as e:
+        print(f"[SYSTEM FAULT]: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+# =====================================================================
+# 3. PRODUCTION ENVIRONMENT INVOCATION
+# =====================================================================
+if __name__ == '__main__':
+    # Bind to 0.0.0.0 and dynamically pull Render's assigned port variable
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host='0.0.0.0', port=port, debug=False)
+    
