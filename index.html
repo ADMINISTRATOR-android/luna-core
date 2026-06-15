@@ -44,7 +44,6 @@
             border-radius: 50%;
             display: inline-block;
             box-shadow: 0 0 8px #00f3ff;
-            animation: pulse 2s infinite;
         }
         .core-container {
             display: flex;
@@ -86,6 +85,7 @@
             line-height: 1.5;
             margin-bottom: 16px;
             border-radius: 2px;
+            color: #7be5ff;
         }
         .deck-wrapper {
             width: 100%;
@@ -120,15 +120,11 @@
             font-weight: bold;
             cursor: pointer;
             letter-spacing: 1px;
-            transition: all 0.2s;
-        }
-        .transfuse-btn:active {
-            background: #00f3ff;
         }
         .matrix-link-btn {
             width: 100%;
             background: transparent;
-            border: 1px solid #52b3d9;
+            border: 1px dashed rgba(82, 179, 217, 0.4);
             color: #52b3d9;
             padding: 12px;
             font-family: inherit;
@@ -136,19 +132,16 @@
             font-weight: bold;
             letter-spacing: 2px;
             cursor: pointer;
-            transition: all 0.3s;
             text-align: center;
         }
         .matrix-link-btn.active {
             background: rgba(0, 243, 255, 0.1);
-            border-color: #00f3ff;
+            border: 1px solid #00f3ff;
             color: #00f3ff;
             text-shadow: 0 0 8px #00f3ff;
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
         }
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes unrotate { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
-        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -165,7 +158,7 @@
     </div>
 
     <div class="display-panel" id="consoleOutput">
-        Luna System Online. Connection paths stabilized. Ready for core transmission injection.
+        Luna System Online. Connection paths stabilized.
     </div>
 
     <div class="deck-wrapper">
@@ -184,64 +177,66 @@
         const consoleOutput = document.getElementById('consoleOutput');
         const statusRing = document.getElementById('statusRing');
 
-        let audioCtx = null;
+        let audioUnlocked = false;
 
         audioMatrixBtn.addEventListener('click', () => {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (AudioContext) {
+                const ctx = new AudioContext();
+                audioUnlocked = true;
+                audioMatrixBtn.classList.add('active');
+                audioMatrixBtn.innerText = "AUDIO MATRIX LINK ACTIVE";
+                consoleOutput.innerText = "Browser permissions acquired. Luna audio stream armed.";
             }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            audioMatrixBtn.classList.add('active');
-            audioMatrixBtn.innerText = "AUDIO MATRIX LINK ACTIVE";
-            consoleOutput.innerText = "Hardware audio permissions acquired. Ready to stream.";
         });
 
         async function transmitDirective() {
-            const text = keyboardInput.value.trim();
-            if (!text) return;
+            const userText = keyboardInput.value.trim();
+            if (!userText) return;
 
-            if (!audioCtx || audioCtx.state === 'suspended') {
-                consoleOutput.innerText = "ERROR: Audio link must be activated before transfusion.";
-                return;
-            }
-
-            keyboardInput.value = '';
-            consoleOutput.innerText = "Processing directive...";
             statusRing.innerText = "THINKING";
+            consoleOutput.innerText = "Processing vector data...";
+            keyboardInput.value = ""; 
 
             try {
-                const response = await fetch('/chat', {
+                // Phase 1: Hit the corrected Groq chat completion link
+                const chatResponse = await fetch('/v1/chat/completions', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: text })
+                    body: JSON.stringify({ messages: [{ role: "user", content: userText }] })
                 });
-
-                if (!response.ok) throw new Error("Transmission interrupted");
-
+                
+                const chatData = await chatResponse.json();
+                if (!chatResponse.ok) throw new Error(chatData.error || `HTTP ${chatResponse.status}`);
+                
+                const lunaReply = chatData.luna_text;
+                consoleOutput.innerText = "Luna: " + lunaReply;
                 statusRing.innerText = "SPEAKING";
-                
-                const data = await response.json();
-                consoleOutput.innerText = "Luna: " + data.response;
 
-                const audioBytes = Uint8Array.from(atob(data.audio), c => c.charCodeAt(0));
-                
-                audioCtx.decodeAudioData(audioBytes.buffer, (buffer) => {
-                    const source = audioCtx.createBufferSource();
-                    source.buffer = buffer;
-                    source.connect(audioCtx.destination);
-                    source.start(0);
-                    source.onended = () => {
-                        statusRing.innerText = "READY";
-                    };
-                }, (err) => {
-                    console.log("Decoding error:", err);
-                    statusRing.innerText = "READY";
+                // Phase 2: Stream Live Audio directly from Cartesia Matrix
+                const audioResponse = await fetch('/tts/synthesize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: lunaReply })
                 });
 
-            } catch (error) {
-                consoleOutput.innerText = "CRITICAL FAULT: Connection vector dropped.";
+                if (!audioResponse.ok) {
+                    const audioErrData = await audioResponse.json().catch(() => ({}));
+                    throw new Error(audioErrData.error || "TTS Stream dropped.");
+                }
+
+                const audioBlob = await audioResponse.blob();
+                const matrixAudioPlayer = new Audio(URL.createObjectURL(audioBlob));
+                
+                matrixAudioPlayer.onended = () => { 
+                    statusRing.innerText = "READY"; 
+                };
+                
+                await matrixAudioPlayer.play();
+
+            } catch (matrixException) {
+                console.error(matrixException);
+                consoleOutput.innerText = "SYSTEM FAULT: " + matrixException.message;
                 statusRing.innerText = "ERROR";
             }
         }
