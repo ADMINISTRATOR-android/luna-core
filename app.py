@@ -1,52 +1,89 @@
 import os
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.middleware.wsgi import WSGIMiddleware
-from flask import Flask as FlaskApp, request as flask_request, send_file
-from piper.voice import PiperVoice
 import requests
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from pydantic import BaseModel
+import io
 
-# Initialize apps
-app = FastAPI()
-flask_app = FlaskApp(__name__)
+app = FastAPI(title="Luna Core Matrix - Cartesia Edition")
 
-# Paths
-MODEL_PATH = "model/en_US-amy-medium.onnx"
-CONFIG_PATH = "model/en_US-amy-medium.onnx.json"
-GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "").strip()
+CARTESIA_API_KEY = os.environ.get("CARTESIA_API_KEY", "").strip()
 
-# Flask TTS Engine
-@flask_app.route('/synthesize', methods=['POST'])
-def synthesize():
-    data = flask_request.get_json()
-    text = data.get("text", "")
-    if not text: return "No text", 400
-    
-    voice = PiperVoice.load(MODEL_PATH, config_path=CONFIG_PATH)
-    output_file = "output.wav"
-    with open(output_file, "wb") as f:
-        voice.synthesize(text, f)
-    return send_file(output_file, mimetype="audio/wav")
+# Cartesia Configurations
+# "sonic-english" is the ultra-fast generation model
+# Voice ID below belongs to a crisp, high-quality female voice matrix
+CARTESIA_MODEL = "sonic-english"
+CARTESIA_VOICE_ID = "694f9389-faee-4321-b3fb-ee0b47f6f695" 
 
-# FastAPI Chat Engine
 class ChatRequest(BaseModel):
     messages: list
 
 @app.get("/", response_class=HTMLResponse)
 async def serve_ui():
-    with open("index.html", "r", encoding="utf-8") as f:
-        return f.read()
+    try:
+        with open("index.html", "r", encoding="utf-8") as f:
+            return f.read()
+    except FileNotFoundError:
+        return "<h1>Critical Error: index.html missing from root!</h1>"
 
 @app.post("/v1/chat/completions")
 async def chat(req: ChatRequest):
-    api_messages = [{"role": "system", "content": "You are Luna. Keep replies short and human."}] + req.messages
-    res = requests.post(
-        "https://api.groq.com/openai/v1/chat/completions",
-        json={"model": "llama-3.3-70b-versatile", "messages": api_messages},
-        headers={"Authorization": f"Bearer {GROQ_API_KEY}"}
-    )
-    return JSONResponse(content={"luna_text": res.json()["choices"][0]["message"]["content"]})
+    if not GROQ_API_KEY:
+        return JSONResponse(status_code=400, content={"error": "GROQ_API_KEY missing from Render."})
+    
+    try:
+        api_messages = [{"role": "system", "content": "You are Luna. Keep replies short and human."}] + req.messages
+        res = requests.post(
+            "https://api.groq.com/openai/v1/chat/completions",
+            json={"model": "llama-3.3-70b-versatile", "messages": api_messages},
+            headers={"Authorization": f"Bearer {GROQ_API_KEY}"},
+            timeout=10
+        )
+        res_data = res.json()
+        return JSONResponse(content={"luna_text": res_data["choices"][0]["message"]["content"]})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": f"Groq Error: {str(e)}"})
 
-# Mount Flask inside FastAPI
-app.mount("/tts", WSGIMiddleware(flask_app))
+@app.post("/tts/synthesize")
+async def synthesize(data: dict):
+    text = data.get("text", "").strip()
+    if not text:
+        return JSONResponse(status_code=400, content={"error": "No text provided"})
+    if not CARTESIA_API_KEY:
+        return JSONResponse(status_code=400, content={"error": "CARTESIA_API_KEY missing from Render."})
+
+    try:
+        # Request audio directly from Cartesia's high-speed endpoint
+        response = requests.post(
+            "https://api.cartesia.ai/tts/bytes",
+            headers={
+                "X-API-Key": CARTESIA_API_KEY,
+                "Cartesia-Version": "2024-06-10",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model_id": CARTESIA_MODEL,
+                "transcript": text,
+                "voice": {
+                    "mode": "id",
+                    "id": CARTESIA_VOICE_ID
+                },
+                "output_format": {
+                    "container": "raw",
+                    "encoding": "pcm_f32le",
+                    "sample_rate": 44100
+                }
+            },
+            timeout=10
+        )
+
+        if response.status_code != 200:
+            return JSONResponse(status_code=response.status_code, content={"error": "Cartesia API dropped vector"})
+
+        # Stream the audio data back directly to your frontend index.html
+        return StreamingResponse(io.BytesIO(response.content), media_type="audio/raw")
+
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": f"TTS Failure: {str(e)}"})
+        
