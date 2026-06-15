@@ -22,18 +22,47 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            padding: 16px;
-            overflow: hidden;
+            padding: 12px;
+            padding-top: 50px; /* Allocated clearing space for the top-left persistent button */
+            overflow-y: auto; 
         }
+
+        /* NEW: Pinned Top-Left Compact Control Badge */
+        .matrix-link-btn {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(1, 10, 25, 0.9);
+            border: 1px dashed rgba(0, 243, 255, 0.5);
+            color: #52b3d9;
+            padding: 6px 10px;
+            font-family: inherit;
+            font-size: 10px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            cursor: pointer;
+            z-index: 100;
+            border-radius: 2px;
+            box-shadow: 0 0 8px rgba(0, 243, 255, 0.1);
+            transition: all 0.2s ease;
+        }
+        .matrix-link-btn.active {
+            background: rgba(0, 243, 255, 0.15);
+            border: 1px solid #00f3ff;
+            color: #00f3ff;
+            text-shadow: 0 0 6px #00f3ff;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+        }
+
         .sys-header {
             width: 100%;
             max-width: 450px;
             border: 1px solid rgba(0, 243, 255, 0.2);
             background: rgba(1, 10, 25, 0.85);
-            padding: 12px;
+            padding: 10px;
             margin-bottom: 10px;
-            font-size: 11px;
-            letter-spacing: 2px;
+            font-size: 10px;
+            letter-spacing: 1px;
             display: flex;
             justify-content: space-between;
             z-index: 10;
@@ -55,8 +84,9 @@
             flex: 1;
             width: 100%;
             max-width: 500px;
+            min-height: 260px;
+            margin: 10px 0;
         }
-        /* Particle Field Canvas Alignment */
         #particleCanvas {
             position: absolute;
             top: 50%;
@@ -64,14 +94,13 @@
             transform: translate(-50%, -50%);
             width: 100%;
             height: 100%;
-            max-height: 380px;
+            max-height: 300px;
             pointer-events: none;
             z-index: 1;
         }
-        /* HUD Core Center Rings Assembly */
         .matrix-ring {
-            width: 180px;
-            height: 180px;
+            width: 160px;
+            height: 160px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -80,7 +109,6 @@
             z-index: 5;
             border-radius: 50%;
         }
-        /* Outer Gear Line */
         .ring-outer-hud {
             position: absolute;
             width: 100%;
@@ -89,7 +117,6 @@
             border-radius: 50%;
             animation: rotateClockwise 35s linear infinite;
         }
-        /* Inner Counter-Rotating Bracket Ring */
         .ring-inner-hud {
             position: absolute;
             width: 82%;
@@ -100,7 +127,6 @@
             border-radius: 50%;
             animation: rotateCounterClockwise 12s linear infinite;
         }
-        /* Core Center Capsule */
         .ring-core-solid {
             position: absolute;
             width: 64%;
@@ -113,17 +139,16 @@
             align-items: center;
             justify-content: center;
         }
-        /* Locked Level Text */
         .ring-text {
             font-weight: bold;
-            font-size: 14px;
+            font-size: 13px;
             letter-spacing: 2px;
             color: #00f3ff;
             text-shadow: 0 0 10px rgba(0, 243, 255, 0.8);
             text-align: center;
             user-select: none;
         }
-        /* Reactive CSS Changes via JavaScript States */
+        
         .matrix-ring.listening .ring-outer-hud { border-color: rgba(189, 147, 249, 0.5); animation-duration: 10s; }
         .matrix-ring.listening .ring-inner-hud { border-color: #bd93f9; border-top-color: #fff; border-bottom-color: #fff; }
         .matrix-ring.listening .ring-core-solid { border-color: #bd93f9; box-shadow: inset 0 0 20px rgba(189, 147, 249, 0.6); }
@@ -134,9 +159,9 @@
             max-width: 450px;
             border: 1px solid rgba(0, 243, 255, 0.2);
             background: rgba(1, 10, 25, 0.85);
-            padding: 14px;
-            min-height: 85px;
-            max-height: 110px;
+            padding: 12px;
+            min-height: 75px;
+            max-height: 100px;
             overflow-y: auto;
             font-size: 12px;
             line-height: 1.5;
@@ -152,6 +177,7 @@
             flex-direction: column;
             gap: 10px;
             margin-top: auto;
+            padding-bottom: 10px;
             z-index: 10;
         }
         .control-deck {
@@ -164,46 +190,30 @@
             flex: 1;
             background: transparent;
             border: none;
-            padding: 14px;
+            padding: 12px;
             color: #fff;
             font-family: inherit;
             font-size: 14px;
             outline: none;
+            width: 50%;
         }
         .transfuse-btn {
             background: #257b9d;
             border: none;
             color: #01060f;
-            padding: 0 20px;
+            padding: 0 16px;
             font-family: inherit;
             font-weight: bold;
             cursor: pointer;
             letter-spacing: 1px;
-        }
-        .matrix-link-btn {
-            width: 100%;
-            background: transparent;
-            border: 1px dashed rgba(82, 179, 217, 0.4);
-            color: #52b3d9;
-            padding: 12px;
-            font-family: inherit;
-            font-size: 11px;
-            font-weight: bold;
-            letter-spacing: 2px;
-            cursor: pointer;
-            text-align: center;
-        }
-        .matrix-link-btn.active {
-            background: rgba(0, 243, 255, 0.1);
-            border: 1px solid #00f3ff;
-            color: #00f3ff;
-            text-shadow: 0 0 8px #00f3ff;
         }
         @keyframes rotateClockwise { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes rotateCounterClockwise { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
     </style>
 </head>
 <body>
+
+    <button id="audioMatrixBtn" class="matrix-link-btn">[ LINK AUDIO ]</button>
 
     <div class="sys-header">
         <div>LUNA MATRIX PLATFORM V6.5</div>
@@ -223,7 +233,7 @@
     </div>
 
     <div class="display-panel" id="consoleOutput">
-        Stardust core online. Arm 'CONNECT AUDIO MATRIX LINK' first, then tap the HUD core or type below.
+        Stardust core online. Tap '[ LINK AUDIO ]' in the top-left corner once to unlock web voice nodes.
     </div>
 
     <div class="deck-wrapper">
@@ -231,8 +241,6 @@
             <input type="text" id="keyboardInput" class="matrix-input" placeholder="Inject cloud parameter..." autocomplete="off">
             <button id="sendTextBtn" class="transfuse-btn">TRANSFUSE</button>
         </div>
-
-        <button id="audioMatrixBtn" class="matrix-link-btn">CONNECT AUDIO MATRIX LINK</button>
     </div>
 
     <script>
@@ -249,35 +257,30 @@
         let audioUnlocked = false;
         let recognition = null;
         let safetyTimeout = null;
-        let currentStatus = "READY"; // READY, LISTENING, THINKING, SPEAKING, ERROR
+        let currentStatus = "READY";
 
-        // --- CANVAS PARTICLE WAVE ENGINE SYSTEM ---
+        // --- CANVAS ENGINE ---
         let particles = [];
         function resizeCanvas() {
             canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = Math.min(canvas.parentElement.clientHeight, 380);
+            canvas.height = Math.min(canvas.parentElement.clientHeight, 300);
         }
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
         class Particle {
-            constructor() {
-                this.reset();
-            }
+            constructor() { this.reset(); }
             reset() {
                 this.angle = Math.random() * Math.PI * 2;
-                this.radius = 80 + Math.random() * 40;
+                this.radius = 70 + Math.random() * 35;
                 this.x = canvas.width / 2 + Math.cos(this.angle) * this.radius;
                 this.y = canvas.height / 2 + Math.sin(this.angle) * this.radius;
                 this.size = Math.random() * 2 + 0.5;
                 this.speed = 0.005 + Math.random() * 0.01;
-                this.waveSpeed = Math.random() * 0.05;
                 this.waveRange = 2 + Math.random() * 5;
-                this.life = Math.random();
             }
             update() {
                 this.angle += this.speed * (currentStatus === "THINKING" ? 4 : currentStatus === "LISTENING" ? 1.5 : 1);
-                
                 let dynamicRadius = this.radius;
                 if (currentStatus === "LISTENING") {
                     dynamicRadius += Math.sin(Date.now() * 0.01 + this.angle) * 12;
@@ -290,7 +293,6 @@
                 } else {
                     dynamicRadius += Math.sin(Date.now() * 0.002 + this.angle * 4) * this.waveRange;
                 }
-
                 this.x = canvas.width / 2 + Math.cos(this.angle) * dynamicRadius;
                 this.y = canvas.height / 2 + Math.sin(this.angle) * dynamicRadius;
             }
@@ -312,23 +314,16 @@
             }
         }
 
-        // Initialize particle array
-        for (let i = 0; i < 160; i++) {
-            particles.push(new Particle());
-        }
+        for (let i = 0; i < 140; i++) { particles.push(new Particle()); }
 
         function animateMatrixParticles() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => {
-                p.update();
-                p.draw();
-            });
+            particles.forEach(p => { p.update(); p.draw(); });
             requestAnimationFrame(animateMatrixParticles);
         }
         animateMatrixParticles();
-        // ------------------------------------------
 
-        // Establish Speech Matrix Node
+        // --- SPEECH RECOGNITION INTERFACE ---
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (SpeechRecognition) {
             recognition = new SpeechRecognition();
@@ -339,7 +334,6 @@
             recognition.onstart = () => {
                 updateCoreState("LISTENING");
                 consoleOutput.innerText = "Listening to voice stream parameter...";
-                
                 clearTimeout(safetyTimeout);
                 safetyTimeout = setTimeout(() => {
                     if (currentStatus === "LISTENING") {
@@ -348,24 +342,11 @@
                     }
                 }, 7000);
             };
-
-            recognition.onerror = (e) => {
-                clearTimeout(safetyTimeout);
-                cleanReset("Audio trace dropped.");
-            };
-
-            recognition.onend = () => {
-                clearTimeout(safetyTimeout);
-                if (currentStatus === "LISTENING") {
-                    cleanReset("Ready.");
-                }
-            };
-
+            recognition.onerror = () => { clearTimeout(safetyTimeout); cleanReset("Audio trace dropped."); };
+            recognition.onend = () => { clearTimeout(safetyTimeout); if (currentStatus === "LISTENING") cleanReset("Ready."); };
             recognition.onresult = (event) => {
                 clearTimeout(safetyTimeout);
-                const voiceResultText = event.results[0][0].transcript;
-                consoleOutput.innerText = `Captured Directive: "${voiceResultText}"`;
-                transmitDirective(voiceResultText);
+                transmitDirective(event.results[0][0].transcript);
             };
         }
 
@@ -378,48 +359,39 @@
                 sysDot.style.boxShadow = "0 0 8px #bd93f9";
             } else {
                 ringButton.classList.remove('listening');
-                if (state === "ERROR") {
-                    sysDot.style.backgroundColor = "#ff5555";
-                    sysDot.style.boxShadow = "0 0 8px #ff5555";
-                } else {
-                    sysDot.style.backgroundColor = "#00f3ff";
-                    sysDot.style.boxShadow = "0 0 8px #00f3ff";
-                }
+                sysDot.style.backgroundColor = state === "ERROR" ? "#ff5555" : "#00f3ff";
+                sysDot.style.boxShadow = state === "ERROR" ? "0 0 8px #ff5555" : "0 0 8px #00f3ff";
             }
         }
 
         function cleanReset(msg) {
             updateCoreState("READY");
             consoleOutput.innerText = msg;
-            particles.forEach(p => p.radius = 80 + Math.random() * 40);
+            particles.forEach(p => p.radius = 70 + Math.random() * 35);
         }
 
         audioMatrixBtn.addEventListener('click', () => {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             if (AudioContext) {
-                const ctx = new AudioContext();
+                const audioCtx = new AudioContext();
                 audioUnlocked = true;
                 audioMatrixBtn.classList.add('active');
-                audioMatrixBtn.innerText = "AUDIO MATRIX LINK ACTIVE";
-                consoleOutput.innerText = "Audio links active. Tap HUD core to execute vocal capture array.";
+                audioMatrixBtn.innerText = "[ AUDIO ACTIVE ]";
+                consoleOutput.innerText = "Audio link established. Tap HUD core ring to communicate.";
             }
         });
 
         ringButton.addEventListener('click', () => {
             if (!audioUnlocked) {
-                consoleOutput.innerText = "CRITICAL FAULT: Arm 'CONNECT AUDIO MATRIX LINK' first!";
+                consoleOutput.innerText = "CRITICAL FAULT: Tap '[ LINK AUDIO ]' in the top-left corner first!";
                 return;
             }
             if (currentStatus === "THINKING" || currentStatus === "SPEAKING") return;
-            
             if (recognition) {
-                if (currentStatus === "LISTENING") {
-                    recognition.stop();
-                } else {
-                    recognition.start();
-                }
+                if (currentStatus === "LISTENING") recognition.stop();
+                else recognition.start();
             } else {
-                consoleOutput.innerText = "Native Speech recognition interface unavailable on this hardware.";
+                consoleOutput.innerText = "Speech interface unavailable on this hardware.";
             }
         });
 
@@ -451,14 +423,10 @@
                     body: JSON.stringify({ text: lunaReply })
                 });
 
-                if (!audioResponse.ok) {
-                    const audioErrData = await audioResponse.json().catch(() => ({}));
-                    throw new Error(audioErrData.error || "Cartesia synthesis node rejected data.");
-                }
+                if (!audioResponse.ok) throw new Error("Cartesia synthesis node rejected data.");
 
                 const audioBlob = await audioResponse.blob();
                 const matrixAudioPlayer = new Audio(URL.createObjectURL(audioBlob));
-                
                 matrixAudioPlayer.onended = () => { cleanReset("Ready."); };
                 await matrixAudioPlayer.play();
 
@@ -470,9 +438,7 @@
         }
 
         sendTextBtn.addEventListener('click', () => transmitDirective());
-        keyboardInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') transmitDirective();
-        });
+        keyboardInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') transmitDirective(); });
     </script>
 </body>
 </html>
