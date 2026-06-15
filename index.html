@@ -55,8 +55,8 @@
             margin-bottom: 16px;
         }
         .matrix-ring {
-            width: 160px;
-            height: 160px;
+            width: 170px;
+            height: 170px;
             border: 2px dashed #00f3ff;
             border-radius: 50%;
             display: flex;
@@ -64,15 +64,28 @@
             justify-content: center;
             position: relative;
             box-shadow: inset 0 0 20px rgba(0, 243, 255, 0.1), 0 0 20px rgba(0, 243, 255, 0.1);
-            animation: rotate 20s linear infinite;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: rotate 25s linear infinite;
+        }
+        .matrix-ring.listening {
+            border-color: #bd93f9;
+            box-shadow: inset 0 0 30px rgba(189, 147, 249, 0.4), 0 0 30px rgba(189, 147, 249, 0.4);
+            animation: rotate 5s linear infinite, pulse 1.5s infinite alternate;
         }
         .ring-text {
             font-weight: bold;
-            letter-spacing: 4px;
+            letter-spacing: 3px;
             color: #00f3ff;
             text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
             transform: rotate(-90deg);
-            animation: unrotate 20s linear infinite;
+            animation: unrotate 25s linear infinite;
+            pointer-events: none;
+        }
+        .matrix-ring.listening .ring-text {
+            color: #bd93f9;
+            text-shadow: 0 0 10px rgba(189, 147, 249, 0.8);
+            animation: unrotate 5s linear infinite;
         }
         .display-panel {
             width: 100%;
@@ -80,7 +93,7 @@
             border: 1px solid rgba(0, 243, 255, 0.2);
             background: rgba(1, 10, 25, 0.8);
             padding: 16px;
-            min-height: 80px;
+            min-height: 90px;
             font-size: 13px;
             line-height: 1.5;
             margin-bottom: 16px;
@@ -142,6 +155,7 @@
         }
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes unrotate { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.04); } }
     </style>
 </head>
 <body>
@@ -152,13 +166,13 @@
     </div>
 
     <div class="core-container">
-        <div class="matrix-ring">
+        <div id="ringButton" class="matrix-ring">
             <div class="ring-text" id="statusRing">READY</div>
         </div>
     </div>
 
     <div class="display-panel" id="consoleOutput">
-        Luna System Online. Connection paths stabilized.
+        Luna System Online. Tap the Audio Matrix button below first, then tap the Center Ring to speak, or use the keyboard.
     </div>
 
     <div class="deck-wrapper">
@@ -172,13 +186,45 @@
 
     <script>
         const audioMatrixBtn = document.getElementById('audioMatrixBtn');
+        const ringButton = document.getElementById('ringButton');
         const sendTextBtn = document.getElementById('sendTextBtn');
         const keyboardInput = document.getElementById('keyboardInput');
         const consoleOutput = document.getElementById('consoleOutput');
         const statusRing = document.getElementById('statusRing');
 
         let audioUnlocked = false;
+        let recognition = null;
 
+        // Initialize Speech Recognition API
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = () => {
+                ringButton.classList.add('listening');
+                statusRing.innerText = "LISTENING";
+                consoleOutput.innerText = "Listening to your voice command...";
+            };
+
+            recognition.onerror = (e) => {
+                console.error(e);
+                ringButton.classList.remove('listening');
+                statusRing.innerText = "READY";
+                consoleOutput.innerText = "Voice matching timed out or rejected.";
+            };
+
+            recognition.onresult = (event) => {
+                ringButton.classList.remove('listening');
+                const voiceText = event.results[0][0].transcript;
+                consoleOutput.innerText = `Captured: "${voiceText}"`;
+                transmitDirective(voiceText);
+            };
+        }
+
+        // Arm Audio System
         audioMatrixBtn.addEventListener('click', () => {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             if (AudioContext) {
@@ -186,20 +232,40 @@
                 audioUnlocked = true;
                 audioMatrixBtn.classList.add('active');
                 audioMatrixBtn.innerText = "AUDIO MATRIX LINK ACTIVE";
-                consoleOutput.innerText = "Browser permissions acquired. Luna audio stream armed.";
+                consoleOutput.innerText = "System arming sequence complete. Center ring microphone initialized.";
             }
         });
 
-        async function transmitDirective() {
-            const userText = keyboardInput.value.trim();
+        // Trigger Speech Recognition on Center Ring Tap
+        ringButton.addEventListener('click', () => {
+            if (!audioUnlocked) {
+                consoleOutput.innerText = "ERROR: You must click 'CONNECT AUDIO MATRIX LINK' first!";
+                return;
+            }
+            if (statusRing.innerText === "THINKING" || statusRing.innerText === "SPEAKING") return;
+            
+            if (recognition) {
+                if (ringButton.classList.contains('listening')) {
+                    recognition.stop();
+                } else {
+                    recognition.start();
+                }
+            } else {
+                consoleOutput.innerText = "Speech recognition matrix not supported on this specific device browser.";
+            }
+        });
+
+        // Core Communication Execution Link
+        async function transmitDirective(forcedText = null) {
+            const userText = forcedText ? forcedText.trim() : keyboardInput.value.trim();
             if (!userText) return;
 
+            if (!forcedText) keyboardInput.value = ""; 
+
             statusRing.innerText = "THINKING";
-            consoleOutput.innerText = "Processing vector data...";
-            keyboardInput.value = ""; 
+            consoleOutput.innerText = "Processing vector data via Groq...";
 
             try {
-                // Phase 1: Hit the corrected Groq chat completion link
                 const chatResponse = await fetch('/v1/chat/completions', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -209,11 +275,10 @@
                 const chatData = await chatResponse.json();
                 if (!chatResponse.ok) throw new Error(chatData.error || `HTTP ${chatResponse.status}`);
                 
-                const lunaReply = chatData.luna_text;
+                const lunaReply = chatData.luna_text || chatData.choices[0].message.content;
                 consoleOutput.innerText = "Luna: " + lunaReply;
                 statusRing.innerText = "SPEAKING";
 
-                // Phase 2: Stream Live Audio directly from Cartesia Matrix
                 const audioResponse = await fetch('/tts/synthesize', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -222,7 +287,7 @@
 
                 if (!audioResponse.ok) {
                     const audioErrData = await audioResponse.json().catch(() => ({}));
-                    throw new Error(audioErrData.error || "TTS Stream dropped.");
+                    throw new Error(audioErrData.error || "Cartesia audio engine dropped validation.");
                 }
 
                 const audioBlob = await audioResponse.blob();
@@ -241,7 +306,8 @@
             }
         }
 
-        sendTextBtn.addEventListener('click', transmitDirective);
+        // Keyboard Action Link
+        sendTextBtn.addEventListener('click', () => transmitDirective());
         keyboardInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') transmitDirective();
         });
