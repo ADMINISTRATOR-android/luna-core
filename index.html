@@ -1,58 +1,62 @@
-<script>
-    async function lunaTransfuse() {
-        const inputField = document.getElementById('keyboardInput');
-        const userText = inputField.value;
-        const orb = document.getElementById('jarvisOrb');
-        const orbText = document.getElementById('orbStateText');
-        const display = document.getElementById('displayPanel');
-        
-        if (!userText) return;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LUNA UI | CORE V3.3</title>
+    <style>
+        body { background: #02080d; color: #52b3d9; font-family: monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+        .jarvis-orb { width: 150px; height: 150px; border: 2px dashed #52b3d9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+        .jarvis-orb.speaking { border-color: #ff3366; box-shadow: 0 0 20px #ff3366; }
+        .display-panel { width: 80%; padding: 20px; background: #051826; border: 1px solid #52b3d9; margin-bottom: 20px; }
+        .control-deck { width: 80%; display: flex; gap: 10px; }
+        input { flex: 1; padding: 10px; background: #051826; border: 1px solid #52b3d9; color: #fff; }
+        button { padding: 10px 20px; background: #52b3d9; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div id="jarvisOrb" class="jarvis-orb"><span id="orbState">READY</span></div>
+    <div id="displayPanel" class="display-panel">LUNA SYSTEM ONLINE</div>
+    <div class="control-deck">
+        <input type="text" id="keyboardInput" placeholder="Transmit directive...">
+        <button id="sendTextBtn">SEND</button>
+    </div>
 
-        orb.className = "jarvis-orb speaking";
-        orbText.innerText = "THINKING...";
-        inputField.value = ""; // Clear input immediately
+    <script>
+        async function lunaTransfuse() {
+            const input = document.getElementById('keyboardInput');
+            const orb = document.getElementById('jarvisOrb');
+            const display = document.getElementById('displayPanel');
+            const text = input.value;
+            if (!text) return;
 
-        try {
-            // 1. Send to Groq
-            const chatRes = await fetch('/v1/chat/completions', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: "llama-3.3-70b-versatile",
-                    messages: [{ role: "user", content: userText }]
-                })
-            });
-            const chatData = await chatRes.json();
-            const lunaReply = chatData.luna_text;
-            display.innerText = "Luna: " + lunaReply;
-
-            // 2. Send to Piper
-            const audioRes = await fetch('/tts/synthesize', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: lunaReply })
-            });
-
-            const audioBlob = await audioRes.blob();
-            const player = new Audio(URL.createObjectURL(audioBlob));
+            orb.className = "jarvis-orb speaking";
+            input.value = "";
             
-            player.onended = () => { 
-                orb.className = "jarvis-orb"; 
-                orbText.innerText = "TAP TO TALK"; 
-            };
-            player.play();
-        } catch (err) {
-            display.innerText = "SYSTEM ERROR: " + err.message;
-            orb.className = "jarvis-orb";
-            orbText.innerText = "TAP TO TALK";
+            try {
+                // Step 1: Chat
+                const chat = await fetch('/v1/chat/completions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ messages: [{role: "user", content: text}] })
+                });
+                const chatData = await chat.json();
+                display.innerText = chatData.luna_text;
+
+                // Step 2: Voice
+                const audio = await fetch('/tts/synthesize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: chatData.luna_text })
+                });
+                const blob = await audio.blob();
+                const player = new Audio(URL.createObjectURL(blob));
+                player.onended = () => orb.className = "jarvis-orb";
+                player.play();
+            } catch (e) { display.innerText = "Error: " + e; }
         }
-    }
 
-    // CLICK HANDLER
-    document.getElementById('sendTextBtn').addEventListener('click', lunaTransfuse);
-
-    // KEYBOARD HANDLER (Press Enter to Send)
-    document.getElementById('keyboardInput').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') lunaTransfuse();
-    });
-</script>
+        document.getElementById('sendTextBtn').onclick = lunaTransfuse;
+        document.getElementById('keyboardInput').onkeypress = (e) => { if(e.key === 'Enter') lunaTransfuse(); };
+    </script>
+</body>
+</html>
