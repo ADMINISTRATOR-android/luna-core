@@ -4,12 +4,8 @@ from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 
 app = Flask(__name__)
-# Enable CORS so your frontend can communicate with this backend seamlessly
 CORS(app)
 
-# =====================================================================
-# 0. ROOT SYSTEM STATUS ENDPOINT (Fixes the browser "Not Found" error)
-# =====================================================================
 @app.route('/', methods=['GET'])
 def system_status():
     return jsonify({
@@ -19,10 +15,6 @@ def system_status():
         "connection": "Nebula stable path active"
     }), 200
 
-
-# =====================================================================
-# 1. GROQ CHAT COMPLETION ENDPOINT
-# =====================================================================
 @app.route('/v1/chat/completions', methods=['POST'])
 def chat_completions():
     try:
@@ -33,7 +25,6 @@ def chat_completions():
         if not groq_api_key:
             return jsonify({"error": "Backend configuration missing GROQ_API_KEY"}), 500
 
-        # Gateway to Groq Upstream Cloud
         url = "https://api.groq.com/openai/v1/chat/completions"
         headers = {
             "Authorization": f"Bearer {groq_api_key}",
@@ -41,7 +32,7 @@ def chat_completions():
         }
         
         payload = {
-            "model": "llama3-8b-8192", # Optimized high-speed model for real-time UI interactions
+            "model": "llama3-8b-8192",
             "messages": user_messages,
             "temperature": 0.7
         }
@@ -49,7 +40,7 @@ def chat_completions():
         response = requests.post(url, headers=headers, json=payload)
         
         if response.status_code != 200:
-            print(f"[GROQ ERROR LOG]: {response.text}")
+            print(f"[GROQ ERROR]: {response.text}")
             return jsonify({"error": f"Groq upstream responded with status {response.status_code}"}), response.status_code
 
         return jsonify(response.json())
@@ -58,10 +49,6 @@ def chat_completions():
         print(f"[SYSTEM FAULT]: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
-
-# =====================================================================
-# 2. CARTESIA VOICE SYNTHESIS ENDPOINT
-# =====================================================================
 @app.route('/tts/synthesize', methods=['POST'])
 def tts_synthesize():
     try:
@@ -75,7 +62,6 @@ def tts_synthesize():
         if not cartesia_api_key:
             return jsonify({"error": "Backend configuration missing CARTESIA_API_KEY"}), 500
 
-        # Build Cartesia payload architecture
         url = "https://api.cartesia.ai/tts/bytes"
         headers = {
             "X-API-Key": cartesia_api_key,
@@ -88,7 +74,7 @@ def tts_synthesize():
             "transcript": text_to_speak,
             "voice": {
                 "mode": "id",
-                "id": "248be419-c216-434c-960d-29f00a13b97a" # Verified Sonic Blue Male voice
+                "id": "248be419-c216-434c-960d-29f00a13b97a"
             },
             "output_format": {
                 "container": "mp3",
@@ -99,20 +85,16 @@ def tts_synthesize():
         response = requests.post(url, headers=headers, json=payload)
         
         if response.status_code != 200:
-            print(f"[CARTESIA ERROR LOG]: {response.text}")
+            print(f"[CARTESIA ERROR]: {response.text}")
             return jsonify({"error": f"Cartesia upstream error status: {response.status_code}"}), response.status_code
 
-        # Return pure binary audio data back to your frontend
         return Response(response.content, mimetype="audio/mpeg")
 
     except Exception as e:
         print(f"[SYSTEM FAULT]: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
-
-# =====================================================================
-# 3. PRODUCTION ENVIRONMENT INVOCATION
-# =====================================================================
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port, debug=False)
+    
