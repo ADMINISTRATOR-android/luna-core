@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LUNA — STARDUST REGEN MATRIX</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             background-color: #01060f;
             background-image: 
@@ -26,156 +22,50 @@
             padding: 24px;
             overflow: hidden;
         }
-
-        /* Top System Log Header */
         .sys-header {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            font-size: 11px;
-            letter-spacing: 2px;
+            width: 100%; display: flex; justify-content: space-between;
+            font-size: 11px; letter-spacing: 2px;
             border: 1px solid rgba(82, 179, 217, 0.15);
-            padding: 12px 16px;
-            background: rgba(2, 12, 27, 0.7);
-            box-shadow: inset 0 0 15px rgba(0, 243, 255, 0.05);
+            padding: 12px 16px; background: rgba(2, 12, 27, 0.7);
         }
-        .sys-status {
-            color: #00f3ff;
-            text-shadow: 0 0 8px rgba(0, 243, 255, 0.5);
-            animation: pulse 2s infinite alternate;
-        }
-
-        /* Holographic Central Core Ring */
-        .core-container {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
+        .sys-status { color: #00f3ff; text-shadow: 0 0 8px rgba(0, 243, 255, 0.5); }
+        .core-container { flex: 1; display: flex; align-items: center; justify-content: center; }
         .matrix-ring {
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
+            width: 180px; height: 180px; border-radius: 50%;
             border: 1px dashed rgba(0, 243, 255, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
+            display: flex; align-items: center; justify-content: center;
             animation: spin 20s linear infinite;
         }
         .matrix-ring-inner {
-            width: 140px;
-            height: 140px;
-            border-radius: 50%;
+            width: 140px; height: 140px; border-radius: 50%;
             border: 2px solid rgba(0, 243, 255, 0.6);
-            box-shadow: 0 0 30px rgba(0, 243, 255, 0.2), inset 0 0 20px rgba(0, 243, 255, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: spin-reverse 10s linear infinite;
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.2);
+            display: flex; align-items: center; justify-content: center;
         }
-        .core-state {
-            font-size: 13px;
-            letter-spacing: 3px;
-            color: #00f3ff;
-            text-shadow: 0 0 10px rgba(0, 243, 255, 0.8);
-            font-weight: bold;
-            animation: text-pulse 1.5s infinite alternate;
-        }
-
-        /* Dynamic Status States */
-        .matrix-ring.processing { border-color: #ff3366; animation-duration: 4s; }
+        .core-state { font-size: 13px; letter-spacing: 3px; color: #00f3ff; font-weight: bold; }
+        .matrix-ring.processing { border-color: #ff3366; }
         .matrix-ring.processing .matrix-ring-inner { border-color: #ff3366; box-shadow: 0 0 40px rgba(255, 51, 102, 0.4); }
         .matrix-ring.processing .core-state { color: #ff3366; text-shadow: 0 0 10px rgba(255, 51, 102, 0.8); }
-
-        /* Dialog Display Panel */
         .display-panel {
-            width: 100%;
-            max-width: 600px;
-            min-height: 110px;
-            background: rgba(2, 12, 27, 0.8);
-            border: 1px solid rgba(82, 179, 217, 0.25);
-            padding: 18px;
-            font-size: 13px;
-            line-height: 1.6;
-            letter-spacing: 1px;
-            color: #7be5ff;
-            margin-bottom: 16px;
-            box-shadow: 0 5px 25px rgba(0,0,0,0.5);
-            overflow-y: auto;
+            width: 100%; max-width: 600px; min-height: 110px;
+            background: rgba(2, 12, 27, 0.8); border: 1px solid rgba(82, 179, 217, 0.25);
+            padding: 18px; font-size: 13px; line-height: 1.6; color: #7be5ff; margin-bottom: 16px;
         }
-
-        /* Control Terminals */
-        .control-deck {
-            width: 100%;
-            max-width: 600px;
-            display: flex;
-            gap: 12px;
-            margin-bottom: 14px;
-        }
+        .control-deck { width: 100%; max-width: 600px; display: flex; gap: 12px; margin-bottom: 14px; }
         .matrix-input {
-            flex: 1;
-            background: rgba(1, 10, 22, 0.9);
-            border: 1px solid rgba(82, 179, 217, 0.4);
-            border-radius: 2px;
-            color: #ffffff;
-            padding: 14px 16px;
-            font-family: monospace;
-            font-size: 13px;
-            letter-spacing: 1px;
-            outline: none;
-            transition: border 0.3s ease;
-        }
-        .matrix-input:focus {
-            border-color: #00f3ff;
-            box-shadow: 0 0 12px rgba(0, 243, 255, 0.15);
-        }
-        .matrix-input::placeholder {
-            color: rgba(82, 179, 217, 0.4);
+            flex: 1; background: rgba(1, 10, 22, 0.9); border: 1px solid rgba(82, 179, 217, 0.4);
+            color: #ffffff; padding: 14px 16px; font-family: monospace; font-size: 13px; outline: none;
         }
         .transfuse-btn {
-            background: rgba(2, 24, 43, 0.8);
-            border: 1px solid #52b3d9;
-            color: #52b3d9;
-            padding: 0 28px;
-            font-weight: bold;
-            font-family: monospace;
-            letter-spacing: 2px;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            background: rgba(2, 24, 43, 0.8); border: 1px solid #52b3d9; color: #52b3d9;
+            padding: 0 28px; font-weight: bold; cursor: pointer;
         }
-        .transfuse-btn:hover {
-            background: #52b3d9;
-            color: #01060f;
-            box-shadow: 0 0 15px rgba(82, 179, 217, 0.4);
-        }
-
-        /* Bottom Functional link */
         .matrix-link-btn {
-            width: 100%;
-            max-width: 600px;
-            background: transparent;
-            border: 1px dashed rgba(82, 179, 217, 0.3);
-            color: #52b3d9;
-            padding: 12px;
-            font-size: 11px;
-            letter-spacing: 3px;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.3s ease;
+            width: 100%; max-width: 600px; background: transparent;
+            border: 1px dashed rgba(82, 179, 217, 0.3); color: #52b3d9;
+            padding: 12px; font-size: 11px; letter-spacing: 3px; cursor: pointer;
         }
-        .matrix-link-btn:hover {
-            border-color: #00f3ff;
-            color: #00f3ff;
-            background: rgba(0, 243, 255, 0.02);
-        }
-
-        /* Animations */
         @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes spin-reverse { to { transform: rotate(-360deg); } }
-        @keyframes pulse { from { opacity: 0.6; } to { opacity: 1; } }
-        @keyframes text-pulse { from { opacity: 0.8; text-shadow: 0 0 4px rgba(0,243,255,0.4); } to { opacity: 1; text-shadow: 0 0 12px rgba(0,243,255,0.9); } }
     </style>
 </head>
 <body>
@@ -195,11 +85,11 @@
     </div>
 
     <div id="displayPanel" class="display-panel">
-        Luna: "Particle cloud generation complete, Ayush. Solid tracks dematerialized into stardust vectors."
+        Luna System Online. Connection paths stabilized.
     </div>
 
     <div class="control-deck">
-        <input type="text" id="keyboardInput" class="matrix-input" placeholder="Inject cloud parameter comm" autocomplete="off">
+        <input type="text" id="keyboardInput" class="matrix-input" placeholder="Inject cloud parameter comm..." autocomplete="off">
         <button id="sendTextBtn" class="transfuse-btn">TRANSFUSE</button>
     </div>
 
@@ -209,16 +99,14 @@
         let audioContextInitialized = false;
 
         async function initAudioMatrix() {
-            if (!audioContextInitialized) {
-                // Pre-activates browser security requirements for immediate audio synthesis playback
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                if (AudioContext) {
-                    const ctx = new AudioContext();
-                    audioContextInitialized = true;
-                    document.getElementById('audioMatrixBtn').innerText = "AUDIO MATRIX LINK ACTIVE";
-                    document.getElementById('audioMatrixBtn').style.borderColor = "#00f3ff";
-                    document.getElementById('audioMatrixBtn').style.color = "#00f3ff";
-                }
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (AudioContext) {
+                const ctx = new AudioContext();
+                audioContextInitialized = true;
+                const btn = document.getElementById('audioMatrixBtn');
+                btn.innerText = "AUDIO MATRIX LINK ACTIVE";
+                btn.style.borderColor = "#00f3ff";
+                btn.style.color = "#00f3ff";
             }
         }
 
@@ -231,13 +119,12 @@
 
             if (!userText) return;
 
-            // Trigger visual processing states
             ring.classList.add('processing');
             coreText.innerText = "THINKING";
             inputElement.value = ""; 
 
             try {
-                // Phase 1: Contact API Backend Node
+                // Phase 1: Run Chat Completion Pipeline
                 const chatResponse = await fetch('/v1/chat/completions', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -245,18 +132,23 @@
                 });
                 
                 const chatData = await chatResponse.json();
-                const lunaReply = chatData.luna_text;
+                if (!chatResponse.ok) throw new Error(chatData.error || `HTTP ${chatResponse.status}`);
                 
-                // Print directly to console logs
-                consoleDisplay.innerText = "Luna: \"" + lunaReply + "\"";
+                const lunaReply = chatData.luna_text;
+                consoleDisplay.innerText = "Luna: " + lunaReply;
                 coreText.innerText = "VOCALIZING";
 
-                // Phase 2: Transfuse Generated Matrix Streams to Audio Engine
+                // Phase 2: Stream Live Audio directly from Cartesia Matrix via Backend
                 const audioResponse = await fetch('/tts/synthesize', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ text: lunaReply })
                 });
+
+                if (!audioResponse.ok) {
+                    const audioErrData = await audioResponse.json().catch(() => ({}));
+                    throw new Error(audioErrData.error || "TTS Stream dropped.");
+                }
 
                 const audioBlob = await audioResponse.blob();
                 const matrixAudioPlayer = new Audio(URL.createObjectURL(audioBlob));
@@ -269,20 +161,20 @@
                 await matrixAudioPlayer.play();
 
             } catch (matrixException) {
-                console.error("Matrix link operational fault:", matrixException);
-                consoleDisplay.innerText = "CRITICAL FAULT: CONNECTION VECTOR DROPPED";
+                console.error(matrixException);
+                consoleDisplay.innerText = "SYSTEM FAULT: " + matrixException.message;
                 ring.classList.remove('processing');
                 coreText.innerText = "ERROR";
             }
         }
 
-        // Attach action handlers directly to UI bindings
+        // Connect Interactive Directives
         document.getElementById('sendTextBtn').onclick = runMatrixTransfusion;
         document.getElementById('audioMatrixBtn').onclick = initAudioMatrix;
         
         document.getElementById('keyboardInput').onkeypress = function(e) { 
             if (e.key === 'Enter') {
-                runMatrixTransfuse(); 
+                runMatrixTransfusion(); 
             }
         };
     </script>
