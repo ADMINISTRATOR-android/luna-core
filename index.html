@@ -254,6 +254,9 @@
         const canvas = document.getElementById('particleCanvas');
         const ctx = canvas.getContext('2d');
 
+        // Hardcoded target production backend URL definition
+        const BACKEND_URL = "https://luna-backend-xknx.onrender.com";
+
         let audioUnlocked = false;
         let recognition = null;
         let safetyTimeout = null;
@@ -404,7 +407,8 @@
             consoleOutput.innerText = "Streaming request parameters to Groq node...";
 
             try {
-                const chatResponse = await fetch('/v1/chat/completions', {
+                // FIXED: Changed relative URL to absolute Backend URL
+                const chatResponse = await fetch(`${BACKEND_URL}/v1/chat/completions`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ messages: [{ role: "user", content: userText }] })
@@ -417,13 +421,15 @@
                 consoleOutput.innerText = "Luna: " + lunaReply;
                 updateCoreState("SPEAKING");
 
-                const audioResponse = await fetch('/tts/synthesize', {
+                // FIXED: Changed relative URL to absolute Backend URL
+                const audioResponse = await fetch(`${BACKEND_URL}/tts/synthesize`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ text: lunaReply })
                 });
 
-                if (!audioResponse.ok) throw new Error("Cartesia synthesis node rejected data.");
+                // FIXED: Corrected error messaging to reflect Deepgram Aura-2 pipeline setup
+                if (!audioResponse.ok) throw new Error("Deepgram synthesis engine node rejected data pipeline.");
 
                 const audioBlob = await audioResponse.blob();
                 const matrixAudioPlayer = new Audio(URL.createObjectURL(audioBlob));
