@@ -25,8 +25,10 @@ def chat_completions():
             "Content-Type": "application/json"
         }
         
+        # FIXED: Updated model ID to a standard, fully supported Groq string 
+        # to fix the 'Groq upstream responded with status 400' error.
         payload = {
-            "model": "llama-3.1-8b-instant",
+            "model": "llama3-8b-8192",
             "messages": messages,
             "temperature": 0.7
         }
