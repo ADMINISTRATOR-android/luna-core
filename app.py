@@ -48,7 +48,7 @@ def chat_completions():
             })
 
         payload = {
-            "model": "llama3-8b-8192",
+            "model": "llama-3.1-8b-instant",
             "messages": processed_messages,
             "temperature": 0.8
         }
