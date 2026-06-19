@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Luna UI Matrix</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             background-color: #01060f;
             background-image: 
@@ -18,194 +14,84 @@
             background-size: 40px 40px;
             color: #52b3d9;
             font-family: 'Courier New', Courier, monospace;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            padding: 12px;
-            padding-top: 50px; /* Allocated clearing space for the top-left persistent button */
-            overflow-y: auto; 
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; padding: 12px; padding-top: 50px; overflow-y: auto; 
         }
-
-        /* NEW: Pinned Top-Left Compact Control Badge */
         .matrix-link-btn {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            background: rgba(1, 10, 25, 0.9);
-            border: 1px dashed rgba(0, 243, 255, 0.5);
-            color: #52b3d9;
-            padding: 6px 10px;
-            font-family: inherit;
-            font-size: 10px;
-            font-weight: bold;
-            letter-spacing: 1px;
-            cursor: pointer;
-            z-index: 100;
-            border-radius: 2px;
-            box-shadow: 0 0 8px rgba(0, 243, 255, 0.1);
-            transition: all 0.2s ease;
+            position: fixed; top: 10px; left: 10px;
+            background: rgba(1, 10, 25, 0.9); border: 1px dashed rgba(0, 243, 255, 0.5);
+            color: #52b3d9; padding: 6px 10px; font-family: inherit; font-size: 10px;
+            font-weight: bold; letter-spacing: 1px; cursor: pointer; z-index: 100;
+            border-radius: 2px; box-shadow: 0 0 8px rgba(0, 243, 255, 0.1); transition: all 0.2s ease;
         }
         .matrix-link-btn.active {
-            background: rgba(0, 243, 255, 0.15);
-            border: 1px solid #00f3ff;
-            color: #00f3ff;
-            text-shadow: 0 0 6px #00f3ff;
-            box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+            background: rgba(0, 243, 255, 0.15); border: 1px solid #00f3ff;
+            color: #00f3ff; text-shadow: 0 0 6px #00f3ff; box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
         }
-
         .sys-header {
-            width: 100%;
-            max-width: 450px;
-            border: 1px solid rgba(0, 243, 255, 0.2);
-            background: rgba(1, 10, 25, 0.85);
-            padding: 10px;
-            margin-bottom: 10px;
-            font-size: 10px;
-            letter-spacing: 1px;
-            display: flex;
-            justify-content: space-between;
-            z-index: 10;
+            width: 100%; max-width: 450px; border: 1px solid rgba(0, 243, 255, 0.2);
+            background: rgba(1, 10, 25, 0.85); padding: 10px; margin-bottom: 10px;
+            font-size: 10px; letter-spacing: 1px; display: flex; justify-content: space-between; z-index: 10;
         }
         .status-dot {
-            width: 8px;
-            height: 8px;
-            background-color: #00f3ff;
-            border-radius: 50%;
-            display: inline-block;
-            box-shadow: 0 0 8px #00f3ff;
+            width: 8px; height: 8px; background-color: #00f3ff; border-radius: 50%;
+            display: inline-block; box-shadow: 0 0 8px #00f3ff;
         }
         .core-container {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            flex: 1;
-            width: 100%;
-            max-width: 500px;
-            min-height: 260px;
-            margin: 10px 0;
+            position: relative; display: flex; flex-direction: column; align-items: center;
+            justify-content: center; flex: 1; width: 100%; max-width: 500px; min-height: 260px; margin: 10px 0;
         }
         #particleCanvas {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 100%;
-            height: 100%;
-            max-height: 300px;
-            pointer-events: none;
-            z-index: 1;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 100%; height: 100%; max-height: 300px; pointer-events: none; z-index: 1;
         }
         .matrix-ring {
-            width: 160px;
-            height: 160px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            cursor: pointer;
-            z-index: 5;
-            border-radius: 50%;
+            width: 160px; height: 160px; display: flex; align-items: center; justify-content: center;
+            position: relative; cursor: pointer; z-index: 5; border-radius: 50%;
         }
         .ring-outer-hud {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border: 2px dashed rgba(0, 243, 255, 0.4);
-            border-radius: 50%;
-            animation: rotateClockwise 35s linear infinite;
+            position: absolute; width: 100%; height: 100%; border: 2px dashed rgba(0, 243, 255, 0.4);
+            border-radius: 50%; animation: rotateClockwise 35s linear infinite;
         }
         .ring-inner-hud {
-            position: absolute;
-            width: 82%;
-            height: 82%;
-            border: 2px dotted rgba(0, 243, 255, 0.6);
-            border-top: 3px solid #00f3ff;
-            border-bottom: 3px solid #00f3ff;
-            border-radius: 50%;
-            animation: rotateCounterClockwise 12s linear infinite;
+            position: absolute; width: 82%; height: 82%; border: 2px dotted rgba(0, 243, 255, 0.6);
+            border-top: 3px solid #00f3ff; border-bottom: 3px solid #00f3ff;
+            border-radius: 50%; animation: rotateCounterClockwise 12s linear infinite;
         }
         .ring-core-solid {
-            position: absolute;
-            width: 64%;
-            height: 64%;
+            position: absolute; width: 64%; height: 64%;
             background: radial-gradient(circle, rgba(1,15,35,0.95) 0%, rgba(1,6,15,1) 100%);
-            border: 2px solid #00f3ff;
-            border-radius: 50%;
+            border: 2px solid #00f3ff; border-radius: 50%;
             box-shadow: inset 0 0 15px rgba(0, 243, 255, 0.4), 0 0 15px rgba(0, 243, 255, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
         }
         .ring-text {
-            font-weight: bold;
-            font-size: 13px;
-            letter-spacing: 2px;
-            color: #00f3ff;
-            text-shadow: 0 0 10px rgba(0, 243, 255, 0.8);
-            text-align: center;
-            user-select: none;
+            font-weight: bold; font-size: 13px; letter-spacing: 2px; color: #00f3ff;
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.8); text-align: center; user-select: none;
         }
-        
         .matrix-ring.listening .ring-outer-hud { border-color: rgba(189, 147, 249, 0.5); animation-duration: 10s; }
         .matrix-ring.listening .ring-inner-hud { border-color: #bd93f9; border-top-color: #fff; border-bottom-color: #fff; }
         .matrix-ring.listening .ring-core-solid { border-color: #bd93f9; box-shadow: inset 0 0 20px rgba(189, 147, 249, 0.6); }
         .matrix-ring.listening .ring-text { color: #bd93f9; text-shadow: 0 0 10px #bd93f9; }
 
         .display-panel {
-            width: 100%;
-            max-width: 450px;
-            border: 1px solid rgba(0, 243, 255, 0.2);
-            background: rgba(1, 10, 25, 0.85);
-            padding: 12px;
-            min-height: 75px;
-            max-height: 100px;
-            overflow-y: auto;
-            font-size: 12px;
-            line-height: 1.5;
-            margin-bottom: 12px;
-            border-radius: 2px;
-            color: #7be5ff;
-            z-index: 10;
+            width: 100%; max-width: 450px; border: 1px solid rgba(0, 243, 255, 0.2);
+            background: rgba(1, 10, 25, 0.85); padding: 12px; min-height: 75px; max-height: 100px;
+            overflow-y: auto; font-size: 12px; line-height: 1.5; margin-bottom: 12px; border-radius: 2px;
+            color: #7be5ff; z-index: 10;
         }
         .deck-wrapper {
-            width: 100%;
-            max-width: 450px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: auto;
-            padding-bottom: 10px;
-            z-index: 10;
+            width: 100%; max-width: 450px; display: flex; flex-direction: column;
+            gap: 10px; margin-top: auto; padding-bottom: 10px; z-index: 10;
         }
-        .control-deck {
-            display: flex;
-            width: 100%;
-            border: 1px solid rgba(0, 243, 255, 0.3);
-            background: #020b18;
-        }
+        .control-deck { display: flex; width: 100%; border: 1px solid rgba(0, 243, 255, 0.3); background: #020b18; }
         .matrix-input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            padding: 12px;
-            color: #fff;
-            font-family: inherit;
-            font-size: 14px;
-            outline: none;
-            width: 50%;
+            flex: 1; background: transparent; border: none; padding: 12px; color: #fff;
+            font-family: inherit; font-size: 14px; outline: none; width: 50%;
         }
         .transfuse-btn {
-            background: #257b9d;
-            border: none;
-            color: #01060f;
-            padding: 0 16px;
-            font-family: inherit;
-            font-weight: bold;
-            cursor: pointer;
-            letter-spacing: 1px;
+            background: #257b9d; border: none; color: #01060f; padding: 0 16px;
+            font-family: inherit; font-weight: bold; cursor: pointer; letter-spacing: 1px;
         }
         @keyframes rotateClockwise { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes rotateCounterClockwise { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
@@ -216,13 +102,12 @@
     <button id="audioMatrixBtn" class="matrix-link-btn">[ LINK AUDIO ]</button>
 
     <div class="sys-header">
-        <div>LUNA MATRIX PLATFORM V6.5</div>
-        <div><span class="status-dot" id="sysDot"></span> NEBULA_CORE</div>
+        <div>LUNA MATRIX PLATFORM V7.0</div>
+        <div><span class="status-dot" id="sysDot"></span> CHROME_NATIVE_VOICE</div>
     </div>
 
     <div class="core-container">
         <canvas id="particleCanvas"></canvas>
-        
         <div id="ringButton" class="matrix-ring">
             <div class="ring-outer-hud"></div>
             <div class="ring-inner-hud"></div>
@@ -233,7 +118,7 @@
     </div>
 
     <div class="display-panel" id="consoleOutput">
-        Stardust core online. Tap '[ LINK AUDIO ]' in the top-left corner once to unlock web voice nodes.
+        Stardust core online. Tap '[ LINK AUDIO ]' to unlock local browser speech synthesis.
     </div>
 
     <div class="deck-wrapper">
@@ -254,13 +139,16 @@
         const canvas = document.getElementById('particleCanvas');
         const ctx = canvas.getContext('2d');
 
-        // Hardcoded target production backend URL definition
+        // Target Backend URL (Same server serving this file)
         const BACKEND_URL = "https://luna-backend-xknx.onrender.com";
 
         let audioUnlocked = false;
         let recognition = null;
         let safetyTimeout = null;
         let currentStatus = "READY";
+
+        // Load browser voices proactively
+        window.speechSynthesis.getVoices();
 
         // --- CANVAS ENGINE ---
         let particles = [];
@@ -285,40 +173,28 @@
             update() {
                 this.angle += this.speed * (currentStatus === "THINKING" ? 4 : currentStatus === "LISTENING" ? 1.5 : 1);
                 let dynamicRadius = this.radius;
-                if (currentStatus === "LISTENING") {
-                    dynamicRadius += Math.sin(Date.now() * 0.01 + this.angle) * 12;
-                } else if (currentStatus === "SPEAKING") {
-                    dynamicRadius += Math.sin(Date.now() * 0.02 + this.angle) * (this.waveRange * 3);
-                } else if (currentStatus === "THINKING") {
+                if (currentStatus === "LISTENING") dynamicRadius += Math.sin(Date.now() * 0.01 + this.angle) * 12;
+                else if (currentStatus === "SPEAKING") dynamicRadius += Math.sin(Date.now() * 0.02 + this.angle) * (this.waveRange * 3);
+                else if (currentStatus === "THINKING") {
                     this.radius -= 0.4;
                     if(this.radius < 10) this.reset();
                     dynamicRadius = this.radius;
-                } else {
-                    dynamicRadius += Math.sin(Date.now() * 0.002 + this.angle * 4) * this.waveRange;
-                }
+                } else dynamicRadius += Math.sin(Date.now() * 0.002 + this.angle * 4) * this.waveRange;
                 this.x = canvas.width / 2 + Math.cos(this.angle) * dynamicRadius;
                 this.y = canvas.height / 2 + Math.sin(this.angle) * dynamicRadius;
             }
             draw() {
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                if (currentStatus === "LISTENING") {
-                    ctx.fillStyle = `rgba(189, 147, 249, ${0.4 + Math.random() * 0.6})`;
-                } else if (currentStatus === "THINKING") {
-                    ctx.fillStyle = `rgba(0, 243, 255, ${0.3 + Math.random() * 0.7})`;
-                } else if (currentStatus === "SPEAKING") {
-                    ctx.fillStyle = `rgba(123, 229, 255, ${0.5 + Math.random() * 0.5})`;
-                } else if (currentStatus === "ERROR") {
-                    ctx.fillStyle = `rgba(255, 85, 85, ${0.5 + Math.random() * 0.5})`;
-                } else {
-                    ctx.fillStyle = `rgba(0, 243, 255, ${0.2 + Math.random() * 0.5})`;
-                }
+                if (currentStatus === "LISTENING") ctx.fillStyle = `rgba(189, 147, 249, ${0.4 + Math.random() * 0.6})`;
+                else if (currentStatus === "THINKING") ctx.fillStyle = `rgba(0, 243, 255, ${0.3 + Math.random() * 0.7})`;
+                else if (currentStatus === "SPEAKING") ctx.fillStyle = `rgba(123, 229, 255, ${0.5 + Math.random() * 0.5})`;
+                else if (currentStatus === "ERROR") ctx.fillStyle = `rgba(255, 85, 85, ${0.5 + Math.random() * 0.5})`;
+                else ctx.fillStyle = `rgba(0, 243, 255, ${0.2 + Math.random() * 0.5})`;
                 ctx.fill();
             }
         }
-
-        for (let i = 0; i < 140; i++) { particles.push(new Particle()); }
-
+        for (let i = 0; i < 140; i++) particles.push(new Particle());
         function animateMatrixParticles() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             particles.forEach(p => { p.update(); p.draw(); });
@@ -339,27 +215,19 @@
                 consoleOutput.innerText = "Listening to voice stream parameter...";
                 clearTimeout(safetyTimeout);
                 safetyTimeout = setTimeout(() => {
-                    if (currentStatus === "LISTENING") {
-                        recognition.stop();
-                        cleanReset("Voice field cycle timed out.");
-                    }
+                    if (currentStatus === "LISTENING") { recognition.stop(); cleanReset("Voice field cycle timed out."); }
                 }, 7000);
             };
             recognition.onerror = () => { clearTimeout(safetyTimeout); cleanReset("Audio trace dropped."); };
             recognition.onend = () => { clearTimeout(safetyTimeout); if (currentStatus === "LISTENING") cleanReset("Ready."); };
-            recognition.onresult = (event) => {
-                clearTimeout(safetyTimeout);
-                transmitDirective(event.results[0][0].transcript);
-            };
+            recognition.onresult = (event) => { clearTimeout(safetyTimeout); transmitDirective(event.results[0][0].transcript); };
         }
 
         function updateCoreState(state) {
-            currentStatus = state;
-            statusRing.innerText = state;
+            currentStatus = state; statusRing.innerText = state;
             if(state === "LISTENING") {
                 ringButton.classList.add('listening');
-                sysDot.style.backgroundColor = "#bd93f9";
-                sysDot.style.boxShadow = "0 0 8px #bd93f9";
+                sysDot.style.backgroundColor = "#bd93f9"; sysDot.style.boxShadow = "0 0 8px #bd93f9";
             } else {
                 ringButton.classList.remove('listening');
                 sysDot.style.backgroundColor = state === "ERROR" ? "#ff5555" : "#00f3ff";
@@ -368,34 +236,28 @@
         }
 
         function cleanReset(msg) {
-            updateCoreState("READY");
-            consoleOutput.innerText = msg;
+            updateCoreState("READY"); consoleOutput.innerText = msg;
             particles.forEach(p => p.radius = 70 + Math.random() * 35);
         }
 
         audioMatrixBtn.addEventListener('click', () => {
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            if (AudioContext) {
-                const audioCtx = new AudioContext();
-                audioUnlocked = true;
-                audioMatrixBtn.classList.add('active');
-                audioMatrixBtn.innerText = "[ AUDIO ACTIVE ]";
-                consoleOutput.innerText = "Audio link established. Tap HUD core ring to communicate.";
-            }
+            audioUnlocked = true;
+            audioMatrixBtn.classList.add('active');
+            audioMatrixBtn.innerText = "[ AUDIO ACTIVE ]";
+            consoleOutput.innerText = "Audio link established. Tap HUD core ring to communicate.";
         });
 
         ringButton.addEventListener('click', () => {
-            if (!audioUnlocked) {
-                consoleOutput.innerText = "CRITICAL FAULT: Tap '[ LINK AUDIO ]' in the top-left corner first!";
+            if (!audioUnlocked) { consoleOutput.innerText = "CRITICAL FAULT: Tap '[ LINK AUDIO ]' first!"; return; }
+            if (currentStatus === "THINKING" || currentStatus === "SPEAKING") {
+                window.speechSynthesis.cancel(); // Stop speaking if tapped again
+                cleanReset("Ready.");
                 return;
             }
-            if (currentStatus === "THINKING" || currentStatus === "SPEAKING") return;
             if (recognition) {
                 if (currentStatus === "LISTENING") recognition.stop();
                 else recognition.start();
-            } else {
-                consoleOutput.innerText = "Speech interface unavailable on this hardware.";
-            }
+            } else consoleOutput.innerText = "Speech interface unavailable on this hardware.";
         });
 
         async function transmitDirective(forcedText = null) {
@@ -407,7 +269,7 @@
             consoleOutput.innerText = "Streaming request parameters to Groq node...";
 
             try {
-                // FIXED: Changed relative URL to absolute Backend URL
+                // 1. Fetch text response from Groq via your Render backend
                 const chatResponse = await fetch(`${BACKEND_URL}/v1/chat/completions`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -417,24 +279,30 @@
                 const chatData = await chatResponse.json();
                 if (!chatResponse.ok) throw new Error(chatData.error || `HTTP ${chatResponse.status}`);
                 
-                const lunaReply = chatData.luna_text || chatData.choices[0].message.content;
+                const lunaReply = chatData.choices[0].message.content;
                 consoleOutput.innerText = "Luna: " + lunaReply;
                 updateCoreState("SPEAKING");
 
-                // FIXED: Changed relative URL to absolute Backend URL
-                const audioResponse = await fetch(`${BACKEND_URL}/tts/synthesize`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: lunaReply })
-                });
-
-                // FIXED: Corrected error messaging to reflect Deepgram Aura-2 pipeline setup
-                if (!audioResponse.ok) throw new Error("Deepgram synthesis engine node rejected data pipeline.");
-
-                const audioBlob = await audioResponse.blob();
-                const matrixAudioPlayer = new Audio(URL.createObjectURL(audioBlob));
-                matrixAudioPlayer.onended = () => { cleanReset("Ready."); };
-                await matrixAudioPlayer.play();
+                // 2. Use Chrome's built-in Native Voice Synthesis
+                if ('speechSynthesis' in window) {
+                    // Cancel any ongoing speech
+                    window.speechSynthesis.cancel();
+                    
+                    const utterance = new SpeechSynthesisUtterance(lunaReply);
+                    
+                    // Attempt to grab a preferred voice (English/Female)
+                    const voices = window.speechSynthesis.getVoices();
+                    const preferredVoice = voices.find(v => v.name.includes('Female') || v.name.includes('Google UK English Female')) || voices[0];
+                    if (preferredVoice) utterance.voice = preferredVoice;
+                    
+                    utterance.onend = () => { cleanReset("Ready."); };
+                    utterance.onerror = (e) => { cleanReset("Native voice error."); };
+                    
+                    window.speechSynthesis.speak(utterance);
+                } else {
+                    consoleOutput.innerText = "Luna: " + lunaReply + " [Native TTS not supported on this browser]";
+                    cleanReset("Ready.");
+                }
 
             } catch (matrixException) {
                 console.error(matrixException);
